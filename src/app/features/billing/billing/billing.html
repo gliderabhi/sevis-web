@@ -25,6 +25,54 @@
     }
   </div>
 
+  <!-- Upload Zone -->
+  <div class="bil-upload-zone" [class.bil-upload-zone--active]="dragOver()"
+       (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+    <input #fileInput type="file" accept=".pdf,application/pdf" class="bil-upload-input"
+           (change)="onFileSelected($event)" />
+
+    @if (uploading()) {
+      <div class="bil-upload-uploading">
+        <svg class="bil-upload-spin" fill="none" viewBox="0 0 24 24" width="22" height="22">
+          <circle cx="12" cy="12" r="10" stroke="rgba(99,102,241,0.2)" stroke-width="4"/>
+          <path fill="#6366f1" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        Processing invoice PDF…
+      </div>
+    } @else {
+      <div class="bil-upload-idle" (click)="triggerFileInput()">
+        <div class="bil-upload-icon-wrap">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+          </svg>
+        </div>
+        <div class="bil-upload-text">
+          <span class="bil-upload-cta">Upload dealer invoice PDF</span>
+          <span class="bil-upload-hint">Drag &amp; drop or click — auto-creates job card &amp; invoice</span>
+        </div>
+        <button class="bil-upload-btn" type="button">Choose PDF</button>
+      </div>
+    }
+
+    @if (uploadSuccess()) {
+      <div class="bil-upload-success">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        {{ uploadSuccess() }}
+      </div>
+    }
+    @if (uploadError()) {
+      <div class="bil-upload-error">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        {{ uploadError() }}
+      </div>
+    }
+  </div>
+
   <!-- Table card -->
   <div class="bil-card">
     @if (loading()) {

@@ -1,10 +1,10 @@
 import { Component, inject, signal, input, OnInit, ViewChild, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService } from '../../core/services/api';
-import { JobCardDetail as JCDetail, Part } from '../../core/models/models';
-import { StatusBadgeComponent } from '../../shared/components/status-badge';
-import { PartPickerComponent } from '../../shared/components/part-picker';
+import { ApiService } from '../../../core/services/api';
+import { JobCardDetail as JCDetail, Part } from '../../../core/models/models';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
+import { PartPickerComponent } from '../../../shared/components/part-picker/part-picker';
 
 const STATUS_STEPS = ['RECEIVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'DELIVERED', 'CLOSED'];
 

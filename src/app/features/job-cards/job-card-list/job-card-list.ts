@@ -1,9 +1,9 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ApiService } from '../../core/services/api';
-import { JobCardSummary } from '../../core/models/models';
-import { StatusBadgeComponent } from '../../shared/components/status-badge';
+import { ApiService } from '../../../core/services/api';
+import { JobCardSummary } from '../../../core/models/models';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 
 const STATUSES = ['ALL', 'RECEIVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'DELIVERED', 'CLOSED'];
 

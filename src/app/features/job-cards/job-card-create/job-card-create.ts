@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService } from '../../core/services/api';
+import { ApiService } from '../../../core/services/api';
 
 @Component({
   selector: 'app-job-card-create',
@@ -17,12 +17,12 @@ export class JobCardCreateComponent {
   error = signal('');
 
   serviceTypes = [
-    'GENERAL_SERVICE',
-    'PERIODIC_MAINTENANCE',
-    'REPAIR',
-    'ACCIDENTAL_REPAIR',
-    'WARRANTY_CLAIM',
-    'PDI',
+    'PERIODIC_SERVICE',
+    'RUNNING_REPAIR',
+    'BODYWORK',
+    'INSPECTION',
+    'ACCIDENTAL',
+    'WARRANTY',
     'OTHER',
   ];
 

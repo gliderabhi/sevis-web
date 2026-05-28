@@ -1,0 +1,120 @@
+<div style="display:flex;flex-direction:column;gap:24px;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <h2 style="margin:0;font-size:20px;font-weight:700;color:#1e293b;">Job Cards</h2>
+      <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Manage all service job cards</p>
+    </div>
+    <button (click)="goNew()"
+      style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
+      (mouseenter)="$any($event.target).style.background='#1d4ed8'"
+      (mouseleave)="$any($event.target).style.background='#2563eb'">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      New Job Card
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div style="background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Status pills -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      @for (s of statuses; track s) {
+        <button (click)="setStatus(s)"
+          style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all 0.15s;"
+          [style.background]="activeStatus() === s ? '#2563eb' : '#f1f5f9'"
+          [style.color]="activeStatus() === s ? '#fff' : '#64748b'">
+          {{ labelOf(s) }}
+        </button>
+      }
+    </div>
+
+    <!-- Search -->
+    <div style="position:relative;max-width:380px;">
+      <svg width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="2" viewBox="0 0 24 24"
+           style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+      </svg>
+      <input type="text" placeholder="Search by JC#, customer, vehicle…"
+             [ngModel]="searchQuery()"
+             (ngModelChange)="searchQuery.set($event)"
+             style="width:100%;padding:9px 13px 9px 36px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;box-sizing:border-box;"
+             (focus)="$any($event.target).style.borderColor='#2563eb'"
+             (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;">
+    @if (loading()) {
+      <div style="display:flex;align-items:center;justify-content:center;height:160px;color:#94a3b8;font-size:14px;">Loading job cards…</div>
+    } @else if (error()) {
+      <div style="padding:16px 20px;color:#dc2626;font-size:13px;">{{ error() }}</div>
+    } @else {
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+              <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">JC #</th>
+              <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Customer</th>
+              <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Vehicle</th>
+              <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Service</th>
+              <th style="padding:12px 20px;text-align:center;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Status</th>
+              <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Date In</th>
+              <th style="padding:12px 20px;text-align:right;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (card of filtered(); track card.id) {
+              <tr [routerLink]="['/job-cards', card.id]"
+                  style="border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background 0.1s;"
+                  (mouseenter)="$any($event.target).closest('tr').style.background='#f8fafc'"
+                  (mouseleave)="$any($event.target).closest('tr').style.background=''">
+
+                <td style="padding:14px 20px;">
+                  <span style="font-family:monospace;font-size:12px;font-weight:700;background:#eff6ff;color:#2563eb;padding:3px 8px;border-radius:5px;">{{ card.jobCardNumber }}</span>
+                </td>
+
+                <td style="padding:14px 20px;">
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#1e293b;">{{ card.customerName }}</p>
+                  <p style="margin:3px 0 0;font-size:12px;color:#94a3b8;">{{ card.customerPhone }}</p>
+                </td>
+
+                <td style="padding:14px 20px;">
+                  <p style="margin:0;font-size:13px;font-weight:600;color:#1e293b;">{{ card.vehicleRegNumber }}</p>
+                  <p style="margin:3px 0 0;font-size:12px;color:#94a3b8;">{{ card.vehicleMakeModel }}</p>
+                </td>
+
+                <td style="padding:14px 20px;font-size:13px;color:#475569;">{{ labelOf(card.serviceType) }}</td>
+
+                <td style="padding:14px 20px;text-align:center;">
+                  <app-status-badge [status]="card.status"/>
+                </td>
+
+                <td style="padding:14px 20px;font-size:13px;color:#64748b;white-space:nowrap;">{{ fmtDate(card.dateIn) }}</td>
+
+                <td style="padding:14px 20px;text-align:right;font-size:14px;font-weight:700;color:#1e293b;">{{ fmt(card.grandTotal) }}</td>
+
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" style="padding:48px 20px;text-align:center;color:#94a3b8;font-size:14px;">
+                  No job cards found.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Row count -->
+      <div style="padding:10px 20px;background:#f8fafc;border-top:1px solid #f1f5f9;text-align:right;font-size:12px;color:#94a3b8;">
+        Showing {{ filtered().length }} of {{ cards().length }} records
+      </div>
+    }
+  </div>
+
+</div>

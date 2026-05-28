@@ -1,0 +1,215 @@
+<div style="display:flex;flex-direction:column;gap:24px;max-width:860px;margin:0 auto;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;gap:14px;">
+    <button (click)="cancel()"
+      style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
+      (mouseenter)="$any($event.target).style.background='#e2e8f0'"
+      (mouseleave)="$any($event.target).style.background='#f1f5f9'">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <div>
+      <h2 style="margin:0;font-size:20px;font-weight:700;color:#1e293b;">New Job Card</h2>
+      <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Create a new service job card</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div style="padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;font-size:13px;color:#dc2626;">{{ error() }}</div>
+  }
+
+  <form (ngSubmit)="onSubmit()" #createForm="ngForm" style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- Section 1: Customer -->
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;">
+      <div style="padding:16px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;background:#f8fafc;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+        <h3 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">Customer Information</h3>
+      </div>
+      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Phone <span style="color:#ef4444;">*</span></label>
+          <input type="tel" name="custPhone" [(ngModel)]="form.customer.phone" required placeholder="9876543210"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Full Name <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="custName" [(ngModel)]="form.customer.name" required placeholder="Customer name"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Email</label>
+          <input type="email" name="custEmail" [(ngModel)]="form.customer.email" placeholder="customer@email.com"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Address</label>
+          <input type="text" name="custAddress" [(ngModel)]="form.customer.address" placeholder="Full address"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Vehicle -->
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;">
+      <div style="padding:16px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;background:#f8fafc;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+        <h3 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">Vehicle Information</h3>
+      </div>
+      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Registration Number <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="regNumber" [(ngModel)]="form.vehicle.regNumber" required placeholder="MH12AB1234"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;text-transform:uppercase;font-family:monospace;font-weight:700;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Make</label>
+          <input type="text" name="make" [(ngModel)]="form.vehicle.make" placeholder="e.g. Tata Motors"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Model</label>
+          <input type="text" name="model" [(ngModel)]="form.vehicle.model" placeholder="e.g. Prima"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Variant</label>
+          <input type="text" name="variant" [(ngModel)]="form.vehicle.variant" placeholder="e.g. 4028.S"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Year</label>
+          <input type="number" name="year" [(ngModel)]="form.vehicle.year" placeholder="2022" min="1990" max="2099"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Fuel Type</label>
+          <select name="fuelType" [(ngModel)]="form.vehicle.fuelType"
+                  style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                  (focus)="$any($event.target).style.borderColor='#2563eb'"
+                  (blur)="$any($event.target).style.borderColor='#e2e8f0'">
+            <option value="">— Select —</option>
+            @for (ft of fuelTypes; track ft) {
+              <option [value]="ft">{{ ft }}</option>
+            }
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Color</label>
+          <input type="text" name="color" [(ngModel)]="form.vehicle.color" placeholder="e.g. White"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Chassis No.</label>
+          <input type="text" name="chassisNo" [(ngModel)]="form.vehicle.chassisNo" placeholder="Chassis number"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;font-family:monospace;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Service Details -->
+    <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;">
+      <div style="padding:16px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;background:#f8fafc;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+        <h3 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">Service Details</h3>
+      </div>
+      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Service Type</label>
+          <select name="serviceType" [(ngModel)]="form.serviceType"
+                  style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                  (focus)="$any($event.target).style.borderColor='#2563eb'"
+                  (blur)="$any($event.target).style.borderColor='#e2e8f0'">
+            @for (st of serviceTypes; track st) {
+              <option [value]="st">{{ labelOf(st) }}</option>
+            }
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">KM In</label>
+          <input type="number" name="kmIn" [(ngModel)]="form.kmIn" placeholder="e.g. 45000" min="0"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Advisor Name</label>
+          <input type="text" name="advisorName" [(ngModel)]="form.advisorName" placeholder="Service advisor"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Expected Delivery</label>
+          <input type="date" name="expectedDelivery" [(ngModel)]="form.expectedDelivery"
+                 style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                 (focus)="$any($event.target).style.borderColor='#2563eb'"
+                 (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;grid-column:span 2;">
+          <label style="font-size:12px;font-weight:600;color:#374151;">Customer Complaint</label>
+          <textarea name="customerComplaint" [(ngModel)]="form.customerComplaint" rows="3"
+                    placeholder="Describe the issue or service requested…"
+                    style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;resize:none;font-family:inherit;"
+                    (focus)="$any($event.target).style.borderColor='#2563eb'"
+                    (blur)="$any($event.target).style.borderColor='#e2e8f0'"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding-bottom:8px;">
+      <button type="button" (click)="cancel()"
+              style="padding:10px 20px;background:#fff;color:#475569;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
+              (mouseenter)="$any($event.target).style.background='#f8fafc'"
+              (mouseleave)="$any($event.target).style.background='#fff'">
+        Cancel
+      </button>
+      <button type="submit" [disabled]="loading()"
+              style="padding:10px 24px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;"
+              [style.opacity]="loading() ? '0.7' : '1'"
+              (mouseenter)="$any($event.target).style.background='#1d4ed8'"
+              (mouseleave)="$any($event.target).style.background='#2563eb'">
+        @if (loading()) {
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;pointer-events:none;">
+            <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="4"/>
+            <path fill="#fff" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" style="pointer-events:none;"/>
+          </svg>
+          Creating…
+        } @else {
+          Create Job Card
+        }
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>

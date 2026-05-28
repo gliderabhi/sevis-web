@@ -97,6 +97,11 @@ export class ApiService {
   getInvoice(id: number): Observable<InvoiceDetail> {
     return this.http.get<InvoiceDetail>(`${BASE}/orders-service/api/invoices/${id}`);
   }
+  uploadInvoicePdf(pdfBytes: ArrayBuffer): Observable<InvoiceDetail> {
+    return this.http.post<InvoiceDetail>(`${BASE}/orders-service/api/invoices/upload`, pdfBytes, {
+      headers: { 'Content-Type': 'application/pdf' },
+    });
+  }
 
   // ── Parts Catalogue ───────────────────────────────────────────────────────
   getParts(page: number, size: number): Observable<PagedResponse<Part>> {

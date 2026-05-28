@@ -1,8 +1,8 @@
 import { Component, inject, signal, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import Chart from 'chart.js/auto';
-import { ApiService } from '../core/services/api';
-import { AuditSummary } from '../core/models/models';
+import { ApiService } from '../../../core/services/api';
+import { AuditSummary } from '../../../core/models/models';
 
 @Component({
   selector: 'app-dashboard',

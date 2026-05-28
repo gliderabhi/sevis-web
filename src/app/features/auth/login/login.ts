@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService } from '../../core/services/api';
-import { AuthService } from '../../core/services/auth';
+import { ApiService } from '../../../core/services/api';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-login',

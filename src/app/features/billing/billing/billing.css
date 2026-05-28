@@ -132,6 +132,95 @@
 .bil-badge--cheque  { background: #fef9c3; color: #a16207; }
 .bil-badge--credit  { background: #fee2e2; color: #b91c1c; }
 
+/* Upload zone */
+.bil-upload-zone {
+  background: #fff;
+  border: 2px dashed #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+.bil-upload-zone--active {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+.bil-upload-input { display: none; }
+.bil-upload-idle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+.bil-upload-icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: #f5f3ff;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6366f1;
+  flex-shrink: 0;
+}
+.bil-upload-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.bil-upload-cta  { font-weight: 600; font-size: 0.9rem; color: #1e293b; }
+.bil-upload-hint { font-size: 0.8rem; color: #94a3b8; }
+.bil-upload-btn {
+  padding: 0.5rem 1.125rem;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.bil-upload-btn:hover { background: #4f46e5; }
+
+.bil-upload-uploading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #6366f1;
+  padding: 0.25rem 0;
+}
+@keyframes bil-spin { to { transform: rotate(360deg); } }
+.bil-upload-spin { animation: bil-spin 0.8s linear infinite; flex-shrink: 0; }
+
+.bil-upload-success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+}
+.bil-upload-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+}
+
 /* Loading / Error */
 .bil-loading { display: flex; align-items: center; justify-content: center; min-height: 10rem; font-size: 0.875rem; color: #94a3b8; }
 .bil-error   { padding: 1rem; font-size: 0.875rem; color: #dc2626; background: #fef2f2; border-radius: 0.5rem; margin: 1rem; }

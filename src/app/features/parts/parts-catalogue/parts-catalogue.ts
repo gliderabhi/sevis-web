@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../core/services/api';
-import { Part } from '../../core/models/models';
+import { ApiService } from '../../../core/services/api';
+import { Part } from '../../../core/models/models';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 const PAGE_SIZE = 20;

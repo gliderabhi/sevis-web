@@ -4,8 +4,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { ApiService } from '../../core/services/api';
-import { Part } from '../../core/models/models';
+import { ApiService } from '../../../core/services/api';
+import { Part } from '../../../core/models/models';
 
 @Component({
   selector: 'app-part-picker',
