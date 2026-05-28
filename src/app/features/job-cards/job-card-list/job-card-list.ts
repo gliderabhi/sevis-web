@@ -20,6 +20,8 @@ export class JobCardListComponent implements OnInit {
   statuses = STATUSES;
   activeStatus = signal('ALL');
   searchQuery = signal('');
+  dateFrom = signal('');
+  dateTo = signal('');
   cards = signal<JobCardSummary[]>([]);
   loading = signal(true);
   error = signal('');
@@ -44,21 +46,29 @@ export class JobCardListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.api.getJobCards().subscribe({
-      next: (cards) => {
-        this.cards.set(cards);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load job cards.');
-        this.loading.set(false);
-      },
+    this.load();
+  }
+
+  private load(): void {
+    this.loading.set(true);
+    this.error.set('');
+    const from = this.dateFrom() || undefined;
+    const to   = this.dateTo()   || undefined;
+    this.api.getJobCards(from, to).subscribe({
+      next: (cards) => { this.cards.set(cards); this.loading.set(false); },
+      error: () => { this.error.set('Failed to load job cards.'); this.loading.set(false); },
     });
   }
 
-  setStatus(s: string): void {
-    this.activeStatus.set(s);
+  applyDateFilter(): void { this.load(); }
+
+  clearDateFilter(): void {
+    this.dateFrom.set('');
+    this.dateTo.set('');
+    this.load();
   }
+
+  setStatus(s: string): void { this.activeStatus.set(s); }
 
   fmtDate(d: string | undefined): string {
     if (!d) return '—';
@@ -70,11 +80,7 @@ export class JobCardListComponent implements OnInit {
     return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
   }
 
-  labelOf(s: string): string {
-    return s.replace(/_/g, ' ');
-  }
+  labelOf(s: string): string { return s.replace(/_/g, ' '); }
 
-  goNew(): void {
-    this.router.navigate(['/job-cards/new']);
-  }
+  goNew(): void { this.router.navigate(['/job-cards/new']); }
 }

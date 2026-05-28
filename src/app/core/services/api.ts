@@ -5,7 +5,7 @@ import {
   LoginRequest, AuthResponse, AuditSummary,
   JobCardSummary, JobCardDetail, CreateJobCardRequest,
   InventoryItem, InvoiceDetail, AppUser, Part, PagedResponse, StockItem,
-  Technician, VehicleRecord,
+  Technician, VehicleRecord, TechnicianSalary,
 } from '../models/models';
 
 const BASE = 'http://32.194.147.195:8080';
@@ -34,8 +34,11 @@ export class ApiService {
   }
 
   // ── Job Cards ────────────────────────────────────────────────────────────
-  getJobCards(): Observable<JobCardSummary[]> {
-    return this.http.get<JobCardSummary[]>(`${BASE}/orders-service/api/job-cards`);
+  getJobCards(from?: string, to?: string): Observable<JobCardSummary[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to)   params = params.set('to', to);
+    return this.http.get<JobCardSummary[]>(`${BASE}/orders-service/api/job-cards`, { params });
   }
   getJobCard(id: number): Observable<JobCardDetail> {
     return this.http.get<JobCardDetail>(`${BASE}/orders-service/api/job-cards/${id}`);
@@ -134,6 +137,24 @@ export class ApiService {
   }
   reassignTechnician(id: number, body: { specialisation?: string; dealerId?: number | null }): Observable<Technician> {
     return this.http.post<Technician>(`${BASE}/orders-service/api/technicians/${id}/reassign`, body);
+  }
+
+  // ── Technician Salaries ───────────────────────────────────────────────────
+  getSalariesByTechnician(technicianId: number): Observable<TechnicianSalary[]> {
+    return this.http.get<TechnicianSalary[]>(`${BASE}/orders-service/api/technician-salaries/technician/${technicianId}`);
+  }
+  getSalariesByMonth(month: number, year: number): Observable<TechnicianSalary[]> {
+    const params = new HttpParams().set('month', month).set('year', year);
+    return this.http.get<TechnicianSalary[]>(`${BASE}/orders-service/api/technician-salaries`, { params });
+  }
+  upsertSalary(body: Partial<TechnicianSalary>): Observable<TechnicianSalary> {
+    return this.http.post<TechnicianSalary>(`${BASE}/orders-service/api/technician-salaries`, body);
+  }
+  markSalaryPaid(id: number): Observable<TechnicianSalary> {
+    return this.http.patch<TechnicianSalary>(`${BASE}/orders-service/api/technician-salaries/${id}/pay`, {});
+  }
+  deleteSalary(id: number): Observable<void> {
+    return this.http.delete<void>(`${BASE}/orders-service/api/technician-salaries/${id}`);
   }
 
   // ── Vehicles ──────────────────────────────────────────────────────────────

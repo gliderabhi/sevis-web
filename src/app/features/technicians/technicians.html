@@ -60,6 +60,7 @@
             @if (!t.active && t.leftDate) { <span class="tec-left">· Left {{ fmtDate(t.leftDate) }}</span> }
           </div>
           <div class="tec-actions">
+            <button class="tec-btn tec-btn--salary" (click)="openSalary(t)">Salary</button>
             @if (t.active) {
               <button class="tec-btn tec-btn--edit" (click)="openEdit(t)">Edit</button>
               <button class="tec-btn tec-btn--deactivate" (click)="deactivate(t)">Deactivate</button>
@@ -124,6 +125,107 @@
         <button class="tec-btn tec-btn--save" (click)="save()" [disabled]="saving()">
           {{ saving() ? 'Saving…' : (editingId() ? 'Update' : 'Add Technician') }}
         </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Salary Modal -->
+@if (salaryTechnician(); as t) {
+  <div class="tec-overlay" (click)="closeSalary()">
+    <div class="tec-modal tec-modal--wide" (click)="$event.stopPropagation()">
+      <div class="tec-modal-header">
+        <h3>Salary — {{ t.name }}</h3>
+        <button class="tec-modal-close" (click)="closeSalary()">✕</button>
+      </div>
+      <div class="tec-modal-body">
+
+        <!-- Add / update salary form -->
+        <div class="tec-salary-form">
+          <div class="tec-field-row">
+            <div class="tec-field">
+              <label>Month</label>
+              <select [ngModel]="salaryForm().month" (ngModelChange)="salaryForm.update(f => ({...f, month: +$event}))">
+                @for (m of months; track $index) { <option [value]="$index + 1">{{ m }}</option> }
+              </select>
+            </div>
+            <div class="tec-field">
+              <label>Year</label>
+              <input type="number" [ngModel]="salaryForm().year" (ngModelChange)="salaryForm.update(f => ({...f, year: +$event}))" />
+            </div>
+          </div>
+          <div class="tec-field-row">
+            <div class="tec-field">
+              <label>Base Salary (₹)</label>
+              <input type="number" [ngModel]="salaryForm().baseSalary" (ngModelChange)="salaryForm.update(f => ({...f, baseSalary: +$event}))" min="0" />
+            </div>
+            <div class="tec-field">
+              <label>Bonus (₹)</label>
+              <input type="number" [ngModel]="salaryForm().bonus" (ngModelChange)="salaryForm.update(f => ({...f, bonus: +$event}))" min="0" />
+            </div>
+            <div class="tec-field">
+              <label>Deductions (₹)</label>
+              <input type="number" [ngModel]="salaryForm().deductions" (ngModelChange)="salaryForm.update(f => ({...f, deductions: +$event}))" min="0" />
+            </div>
+          </div>
+          <div class="tec-field">
+            <label>Notes</label>
+            <input type="text" [ngModel]="salaryForm().notes" (ngModelChange)="salaryForm.update(f => ({...f, notes: $event}))" placeholder="Optional notes" />
+          </div>
+          <div class="tec-salary-net">
+            Net Pay: <strong>{{ fmt(netPay()) }}</strong>
+          </div>
+          @if (salaryError()) { <div class="tec-form-error">{{ salaryError() }}</div> }
+          <button class="tec-btn tec-btn--save" (click)="saveSalary()" [disabled]="savingSalary()" style="align-self:flex-start;">
+            {{ savingSalary() ? 'Saving…' : 'Save Salary Record' }}
+          </button>
+        </div>
+
+        <!-- History table -->
+        <div class="tec-salary-history">
+          <div class="tec-history-label">Salary History</div>
+          @if (salaryLoading()) {
+            <div class="tec-loading">Loading…</div>
+          } @else {
+            <table class="tec-salary-table">
+              <thead>
+                <tr>
+                  <th>Month / Year</th>
+                  <th class="tr">Base</th>
+                  <th class="tr">Bonus</th>
+                  <th class="tr">Deductions</th>
+                  <th class="tr">Net Pay</th>
+                  <th>Status</th>
+                  <th>Paid On</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of salaries(); track s.id) {
+                  <tr>
+                    <td>{{ monthName(s.month) }} {{ s.year }}</td>
+                    <td class="tr">{{ fmt(s.baseSalary) }}</td>
+                    <td class="tr">{{ fmt(s.bonus) }}</td>
+                    <td class="tr">{{ fmt(s.deductions) }}</td>
+                    <td class="tr tec-td-bold">{{ fmt(s.netPay) }}</td>
+                    <td>
+                      <span class="tec-pay-badge" [class.tec-pay-badge--paid]="s.status === 'PAID'">{{ s.status }}</span>
+                    </td>
+                    <td class="tec-td-muted">{{ s.paidDate ? fmtDate(s.paidDate) : '—' }}</td>
+                    <td class="tec-td-actions">
+                      @if (s.status !== 'PAID') {
+                        <button class="tec-btn tec-btn--reassign" style="padding:3px 8px;font-size:0.75rem;" (click)="markPaid(s)">Mark Paid</button>
+                      }
+                      <button class="tec-btn tec-btn--deactivate" style="padding:3px 8px;font-size:0.75rem;" (click)="deleteSalary(s)">Delete</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:1.5rem;">No salary records yet.</td></tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
       </div>
     </div>
   </div>

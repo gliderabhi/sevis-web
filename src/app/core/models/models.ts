@@ -10,6 +10,14 @@ export interface AuditSummary {
   totalRevenue: number; revenueThisMonth: number; invoicesThisMonth: number;
   revenuePreviousMonth: number; invoicesPreviousMonth: number;
   totalInvoices: number; averageInvoiceValue: number;
+  totalSalaryPaid: number; salaryPaidThisMonth: number; netProfitThisMonth: number;
+}
+
+export interface TechnicianSalary {
+  id: number; technicianId: number; technicianName: string;
+  month: number; year: number;
+  baseSalary: number; bonus: number; deductions: number; netPay: number;
+  status: string; paidDate?: string; notes?: string;
 }
 
 // ── Job Cards ─────────────────────────────────────────────────────────────────

@@ -1,9 +1,11 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api';
-import { Technician } from '../../core/models/models';
+import { Technician, TechnicianSalary } from '../../core/models/models';
 
 const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', panNumber: '', aadhaarNumber: '' });
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 @Component({
   selector: 'app-technicians',
@@ -20,6 +22,7 @@ export class TechniciansComponent implements OnInit {
   search = signal('');
   showInactive = signal(false);
 
+  // Add/Edit modal
   showForm = signal(false);
   saving = signal(false);
   formError = signal('');
@@ -27,6 +30,15 @@ export class TechniciansComponent implements OnInit {
   form = signal<Partial<Technician>>(BLANK());
 
   specialisations = ['MECHANICAL', 'ELECTRICAL', 'BODYWORK', 'AC', 'GENERAL'];
+  months = MONTHS;
+
+  // Salary modal
+  salaryTechnician = signal<Technician | null>(null);
+  salaries = signal<TechnicianSalary[]>([]);
+  salaryLoading = signal(false);
+  savingSalary = signal(false);
+  salaryError = signal('');
+  salaryForm = signal({ month: new Date().getMonth() + 1, year: new Date().getFullYear(), baseSalary: 0, bonus: 0, deductions: 0, notes: '' });
 
   filtered = computed(() => {
     const q = this.search().toLowerCase().trim();
@@ -48,6 +60,7 @@ export class TechniciansComponent implements OnInit {
     });
   }
 
+  // ── Add/Edit ──────────────────────────────────────────────────────────────
   openAdd(): void {
     this.editingId.set(null);
     this.form.set(BLANK());
@@ -87,6 +100,58 @@ export class TechniciansComponent implements OnInit {
     this.api.reassignTechnician(t.id, { specialisation: t.specialisation }).subscribe({ next: () => this.load() });
   }
 
+  // ── Salary ────────────────────────────────────────────────────────────────
+  openSalary(t: Technician): void {
+    this.salaryTechnician.set(t);
+    this.salaryError.set('');
+    this.salaryForm.set({ month: new Date().getMonth() + 1, year: new Date().getFullYear(), baseSalary: 0, bonus: 0, deductions: 0, notes: '' });
+    this.salaryLoading.set(true);
+    this.api.getSalariesByTechnician(t.id).subscribe({
+      next: (list) => { this.salaries.set(list); this.salaryLoading.set(false); },
+      error: () => this.salaryLoading.set(false),
+    });
+  }
+
+  closeSalary(): void { this.salaryTechnician.set(null); }
+
+  saveSalary(): void {
+    const t = this.salaryTechnician();
+    if (!t) return;
+    const f = this.salaryForm();
+    this.savingSalary.set(true);
+    this.salaryError.set('');
+    this.api.upsertSalary({ technicianId: t.id, ...f }).subscribe({
+      next: () => {
+        this.savingSalary.set(false);
+        this.api.getSalariesByTechnician(t.id).subscribe({ next: (list) => this.salaries.set(list) });
+      },
+      error: (err) => { this.salaryError.set(err?.error?.message ?? 'Failed to save salary.'); this.savingSalary.set(false); },
+    });
+  }
+
+  markPaid(s: TechnicianSalary): void {
+    const t = this.salaryTechnician();
+    if (!t) return;
+    this.api.markSalaryPaid(s.id).subscribe({
+      next: () => this.api.getSalariesByTechnician(t.id).subscribe({ next: (list) => this.salaries.set(list) }),
+    });
+  }
+
+  deleteSalary(s: TechnicianSalary): void {
+    const t = this.salaryTechnician();
+    if (!t || !confirm('Delete this salary record?')) return;
+    this.api.deleteSalary(s.id).subscribe({
+      next: () => this.api.getSalariesByTechnician(t.id).subscribe({ next: (list) => this.salaries.set(list) }),
+    });
+  }
+
+  netPay(): number {
+    const f = this.salaryForm();
+    return (f.baseSalary || 0) + (f.bonus || 0) - (f.deductions || 0);
+  }
+
+  monthName(m: number): string { return MONTHS[m - 1]; }
+
   initials(name: string): string {
     return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   }
@@ -94,5 +159,9 @@ export class TechniciansComponent implements OnInit {
   fmtDate(d: string | undefined): string {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  fmt(n: number): string {
+    return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
   }
 }
