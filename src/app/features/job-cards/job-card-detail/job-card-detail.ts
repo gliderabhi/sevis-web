@@ -2,7 +2,7 @@ import { Component, inject, signal, input, OnInit, ViewChild, computed } from '@
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api';
-import { JobCardDetail as JCDetail, Part } from '../../../core/models/models';
+import { JobCardDetail as JCDetail, Part, Technician } from '../../../core/models/models';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 import { PartPickerComponent } from '../../../shared/components/part-picker/part-picker';
 
@@ -41,8 +41,11 @@ export class JobCardDetailComponent implements OnInit {
   savingPart = signal(false);
   savingAncillary = signal(false);
 
+  // Technicians list for labour form
+  technicians = signal<Technician[]>([]);
+
   // Form data models
-  labourForm = { description: '', type: 'MECHANICAL', quantity: 1, rate: 0 };
+  labourForm = { description: '', type: 'MECHANICAL', technicianId: null as number | null, quantity: 1, rate: 0 };
   partForm = { partNumber: '', description: '', partType: 'SPARE_PART', quantity: 1, unitPrice: 0 };
   ancillaryForm = { description: '', amount: 0 };
 
@@ -67,6 +70,7 @@ export class JobCardDetailComponent implements OnInit {
       return;
     }
     this.load(idNum);
+    this.api.getActiveTechnicians().subscribe({ next: (t) => this.technicians.set(t) });
   }
 
   private load(idNum: number): void {
@@ -139,7 +143,7 @@ export class JobCardDetailComponent implements OnInit {
 
   // Labour Management
   openLabourForm() {
-    this.labourForm = { description: '', type: 'MECHANICAL', quantity: 1, rate: 0 };
+    this.labourForm = { description: '', type: 'MECHANICAL', technicianId: null, quantity: 1, rate: 0 };
     this.showLabourForm.set(true);
   }
   closeLabourForm() { this.showLabourForm.set(false); }

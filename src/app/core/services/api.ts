@@ -5,6 +5,7 @@ import {
   LoginRequest, AuthResponse, AuditSummary,
   JobCardSummary, JobCardDetail, CreateJobCardRequest,
   InventoryItem, InvoiceDetail, AppUser, Part, PagedResponse, StockItem,
+  Technician, VehicleRecord,
 } from '../models/models';
 
 const BASE = 'http://32.194.147.195:8080';
@@ -113,6 +114,31 @@ export class ApiService {
     return this.http.get<Part[]>(`${BASE}/inventory-service/api/parts/search`, {
       params: new HttpParams().set('q', q).set('size', 20),
     });
+  }
+
+  // ── Technicians ───────────────────────────────────────────────────────────
+  getTechnicians(): Observable<Technician[]> {
+    return this.http.get<Technician[]>(`${BASE}/orders-service/api/technicians`);
+  }
+  getActiveTechnicians(): Observable<Technician[]> {
+    return this.http.get<Technician[]>(`${BASE}/orders-service/api/technicians/active`);
+  }
+  createTechnician(body: Partial<Technician>): Observable<Technician> {
+    return this.http.post<Technician>(`${BASE}/orders-service/api/technicians`, body);
+  }
+  updateTechnician(id: number, body: Partial<Technician>): Observable<Technician> {
+    return this.http.put<Technician>(`${BASE}/orders-service/api/technicians/${id}`, body);
+  }
+  deleteTechnician(id: number): Observable<void> {
+    return this.http.delete<void>(`${BASE}/orders-service/api/technicians/${id}`);
+  }
+
+  // ── Vehicles ──────────────────────────────────────────────────────────────
+  getVehicles(): Observable<VehicleRecord[]> {
+    return this.http.get<VehicleRecord[]>(`${BASE}/orders-service/api/vehicles`);
+  }
+  getVehicleHistory(id: number): Observable<JobCardSummary[]> {
+    return this.http.get<JobCardSummary[]>(`${BASE}/orders-service/api/vehicles/${id}/history`);
   }
 
   // ── Users ─────────────────────────────────────────────────────────────────

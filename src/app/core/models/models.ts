@@ -23,7 +23,9 @@ export interface VehicleInfo  {
   id: number; regNumber: string; make?: string; model?: string; variant?: string;
   year?: number; chassisNo?: string; engineNo?: string; color?: string; fuelType?: string;
 }
-export interface LabourItemInfo   { id: number; description: string; type: string; quantity: number; rate: number; amount: number; }
+export interface LabourItemInfo   { id: number; description: string; type: string; technicianId?: number; technicianName?: string; quantity: number; rate: number; amount: number; }
+export interface Technician       { id: number; name: string; phone?: string; specialisation?: string; employeeCode?: string; active: boolean; }
+export interface VehicleRecord    { id: number; regNumber: string; make?: string; model?: string; variant?: string; year?: number; chassisNo?: string; engineNo?: string; color?: string; fuelType?: string; }
 export interface PartItemInfo     { id: number; partNumber: string; description: string; partType: string; quantity: number; unitPrice: number; totalPrice: number; }
 export interface AncillaryItemInfo{ id: number; description: string; amount: number; }
 export interface ChecksInfo {

@@ -1,0 +1,168 @@
+<div class="veh-page">
+
+  <div class="veh-header">
+    <div>
+      <h1 class="veh-title">Vehicles</h1>
+      <p class="veh-subtitle">All registered vehicles — click to view service history</p>
+    </div>
+  </div>
+
+  <div class="veh-toolbar">
+    <div class="veh-search-wrap">
+      <svg class="veh-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input class="veh-search" type="text" placeholder="Search reg number, make, model…"
+             [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      @if (search()) { <button class="veh-search-clear" (click)="search.set('')">✕</button> }
+    </div>
+    @if (!loading()) {
+      <span class="veh-count">{{ filtered().length }} vehicle{{ filtered().length === 1 ? '' : 's' }}</span>
+    }
+  </div>
+
+  <div class="veh-card">
+    @if (loading()) {
+      <div class="veh-loading">Loading vehicles…</div>
+    } @else if (error()) {
+      <div class="veh-error">{{ error() }}</div>
+    } @else {
+      <div class="veh-table-wrap">
+        <table class="veh-table">
+          <thead>
+            <tr>
+              <th>Reg Number</th>
+              <th>Make / Model</th>
+              <th>Variant</th>
+              <th>Year</th>
+              <th>Fuel</th>
+              <th>Color</th>
+              <th>Chassis No</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of filtered(); track v.id) {
+              <tr class="veh-row" (click)="openHistory(v)">
+                <td class="veh-td-reg">{{ v.regNumber }}</td>
+                <td class="veh-td-bold">{{ v.make ?? '—' }} {{ v.model ?? '' }}</td>
+                <td class="veh-td-muted">{{ v.variant ?? '—' }}</td>
+                <td class="veh-td-muted">{{ v.year ?? '—' }}</td>
+                <td>
+                  @if (v.fuelType) {
+                    <span class="veh-fuel veh-fuel--{{ v.fuelType.toLowerCase() }}">{{ v.fuelType }}</span>
+                  } @else { <span class="veh-td-muted">—</span> }
+                </td>
+                <td class="veh-td-muted">{{ v.color ?? '—' }}</td>
+                <td class="veh-td-mono">{{ v.chassisNo ?? '—' }}</td>
+                <td class="veh-td-action">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" class="veh-empty">No vehicles found.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Service History Panel -->
+@if (selectedVehicle(); as v) {
+  <div class="veh-overlay" (click)="closeHistory()">
+    <div class="veh-panel" (click)="$event.stopPropagation()">
+
+      <div class="veh-panel-hdr">
+        <div>
+          <div class="veh-panel-reg">{{ v.regNumber }}</div>
+          <div class="veh-panel-sub">
+            {{ v.make ?? '' }} {{ v.model ?? '' }}
+            @if (v.variant) { · {{ v.variant }} }
+            @if (v.year) { · {{ v.year }} }
+            @if (v.fuelType) { · {{ v.fuelType }} }
+          </div>
+        </div>
+        <button class="veh-close-btn" (click)="closeHistory()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Vehicle details -->
+      <div class="veh-detail-grid">
+        @if (v.chassisNo) {
+          <div class="veh-detail-card">
+            <div class="veh-detail-label">Chassis No</div>
+            <div class="veh-detail-val veh-mono">{{ v.chassisNo }}</div>
+          </div>
+        }
+        @if (v.engineNo) {
+          <div class="veh-detail-card">
+            <div class="veh-detail-label">Engine No</div>
+            <div class="veh-detail-val veh-mono">{{ v.engineNo }}</div>
+          </div>
+        }
+        @if (v.color) {
+          <div class="veh-detail-card">
+            <div class="veh-detail-label">Color</div>
+            <div class="veh-detail-val">{{ v.color }}</div>
+          </div>
+        }
+        @if (v.fuelType) {
+          <div class="veh-detail-card">
+            <div class="veh-detail-label">Fuel Type</div>
+            <div class="veh-detail-val">{{ v.fuelType }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Service history -->
+      <div class="veh-history-section">
+        <div class="veh-history-title">Service History</div>
+
+        @if (historyLoading()) {
+          <div class="veh-loading">Loading history…</div>
+        } @else {
+          <div class="veh-table-wrap">
+            <table class="veh-table">
+              <thead>
+                <tr>
+                  <th>Job Card #</th>
+                  <th>Date In</th>
+                  <th>Service Type</th>
+                  <th>KMs</th>
+                  <th>Status</th>
+                  <th class="veh-th-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (jc of history(); track jc.id) {
+                  <tr>
+                    <td class="veh-td-mono">{{ jc.jobCardNumber }}</td>
+                    <td class="veh-td-muted">{{ fmtDate(jc.dateIn) }}</td>
+                    <td class="veh-td-muted">{{ labelOf(jc.serviceType) }}</td>
+                    <td class="veh-td-muted">{{ jc.kmIn | number }}</td>
+                    <td>
+                      <span class="veh-status veh-status--{{ jc.status.toLowerCase().replace('_', '-') }}">
+                        {{ labelOf(jc.status) }}
+                      </span>
+                    </td>
+                    <td class="veh-td-right veh-td-bold">{{ fmt(jc.grandTotal) }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="6" class="veh-empty">No service history yet.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+}

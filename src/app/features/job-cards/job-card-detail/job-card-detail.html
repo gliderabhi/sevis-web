@@ -226,6 +226,7 @@
             <tr>
               <th>Description</th>
               <th>Type</th>
+              <th>Technician</th>
               <th class="text-right">Qty</th>
               <th class="text-right">Rate</th>
               <th class="text-right">Amount</th>
@@ -237,6 +238,7 @@
               <tr>
                 <td class="font-medium">{{ l.description }}</td>
                 <td><span class="jcd-type-badge">{{ l.type }}</span></td>
+                <td class="text-muted">{{ l.technicianName ?? '—' }}</td>
                 <td class="text-right">{{ l.quantity }}</td>
                 <td class="text-right text-muted">{{ fmt(l.rate) }}</td>
                 <td class="text-right font-bold">{{ fmt(l.amount) }}</td>
@@ -251,7 +253,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="6" class="jcd-empty">No labour items added yet</td></tr>
+              <tr><td colspan="7" class="jcd-empty">No labour items added yet</td></tr>
             }
           </tbody>
         </table>
@@ -548,6 +550,15 @@
             <option value="ELECTRICAL">Electrical</option>
             <option value="BODY_WORK">Body Work</option>
             <option value="WASHING">Washing</option>
+          </select>
+        </div>
+        <div class="jcd-field">
+          <label class="jcd-label">Technician</label>
+          <select [(ngModel)]="labourForm.technicianId" class="jcd-select">
+            <option [ngValue]="null">— Unassigned —</option>
+            @for (t of technicians(); track t.id) {
+              <option [ngValue]="t.id">{{ t.name }}{{ t.specialisation ? ' · ' + t.specialisation : '' }}</option>
+            }
           </select>
         </div>
         <div class="jcd-field-row">
