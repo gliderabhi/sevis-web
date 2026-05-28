@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api';
-import { InvoiceDetail } from '../../../core/models/models';
+import { ApiService } from '../../core/services/api';
+import { InvoiceDetail } from '../../core/models/models';
 
 @Component({
   selector: 'app-billing',

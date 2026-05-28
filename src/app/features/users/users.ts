@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api';
-import { AppUser } from '../../../core/models/models';
+import { ApiService } from '../../core/services/api';
+import { AppUser } from '../../core/models/models';
 
 @Component({
   selector: 'app-users',

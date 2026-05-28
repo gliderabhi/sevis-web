@@ -1,8 +1,8 @@
 import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api';
-import { InventoryItem, Part } from '../../../core/models/models';
-import { PartPickerComponent } from '../../../shared/components/part-picker/part-picker';
+import { ApiService } from '../../core/services/api';
+import { InventoryItem, Part } from '../../core/models/models';
+import { PartPickerComponent } from '../../shared/components/part-picker/part-picker';
 
 @Component({
   selector: 'app-inventory',

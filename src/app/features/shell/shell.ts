@@ -2,8 +2,8 @@ import { Component, inject, computed } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AuthService } from '../../../core/services/auth';
-import { ApiService } from '../../../core/services/api';
+import { AuthService } from '../../core/services/auth';
+import { ApiService } from '../../core/services/api';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
