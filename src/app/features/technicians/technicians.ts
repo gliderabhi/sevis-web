@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api';
 import { Technician } from '../../core/models/models';
 
-const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', active: true });
+const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', panNumber: '', aadhaarNumber: '' });
 
 @Component({
   selector: 'app-technicians',
@@ -18,6 +18,7 @@ export class TechniciansComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   search = signal('');
+  showInactive = signal(false);
 
   showForm = signal(false);
   saving = signal(false);
@@ -29,17 +30,16 @@ export class TechniciansComponent implements OnInit {
 
   filtered = computed(() => {
     const q = this.search().toLowerCase().trim();
-    if (!q) return this.technicians();
-    return this.technicians().filter(t =>
+    const list = this.showInactive() ? this.technicians() : this.technicians().filter(t => t.active);
+    if (!q) return list;
+    return list.filter(t =>
       t.name.toLowerCase().includes(q) ||
       t.employeeCode?.toLowerCase().includes(q) ||
       t.specialisation?.toLowerCase().includes(q)
     );
   });
 
-  ngOnInit(): void {
-    this.load();
-  }
+  ngOnInit(): void { this.load(); }
 
   private load(): void {
     this.api.getTechnicians().subscribe({
@@ -57,7 +57,7 @@ export class TechniciansComponent implements OnInit {
 
   openEdit(t: Technician): void {
     this.editingId.set(t.id);
-    this.form.set({ ...t });
+    this.form.set({ name: t.name, phone: t.phone, specialisation: t.specialisation, employeeCode: t.employeeCode, panNumber: t.panNumber, aadhaarNumber: t.aadhaarNumber });
     this.formError.set('');
     this.showForm.set(true);
   }
@@ -78,11 +78,21 @@ export class TechniciansComponent implements OnInit {
   }
 
   deactivate(t: Technician): void {
-    if (!confirm(`Deactivate ${t.name}?`)) return;
+    if (!confirm(`Mark ${t.name} as inactive? Their historical records will be preserved.`)) return;
     this.api.deleteTechnician(t.id).subscribe({ next: () => this.load() });
+  }
+
+  reassign(t: Technician): void {
+    if (!confirm(`Re-activate ${t.name} at this dealer? A new assignment will be created.`)) return;
+    this.api.reassignTechnician(t.id, { specialisation: t.specialisation }).subscribe({ next: () => this.load() });
   }
 
   initials(name: string): string {
     return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  fmtDate(d: string | undefined): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 }

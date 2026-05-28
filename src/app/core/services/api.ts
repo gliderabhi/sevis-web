@@ -132,6 +132,9 @@ export class ApiService {
   deleteTechnician(id: number): Observable<void> {
     return this.http.delete<void>(`${BASE}/orders-service/api/technicians/${id}`);
   }
+  reassignTechnician(id: number, body: { specialisation?: string; dealerId?: number | null }): Observable<Technician> {
+    return this.http.post<Technician>(`${BASE}/orders-service/api/technicians/${id}/reassign`, body);
+  }
 
   // ── Vehicles ──────────────────────────────────────────────────────────────
   getVehicles(): Observable<VehicleRecord[]> {

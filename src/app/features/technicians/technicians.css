@@ -48,6 +48,10 @@
 
 .tec-spec { font-size: 0.8125rem; color: #6366f1; font-weight: 500; }
 .tec-phone { font-size: 0.8125rem; color: #64748b; }
+.tec-id    { font-size: 0.75rem; color: #64748b; font-family: monospace; }
+.tec-dates { font-size: 0.75rem; color: #94a3b8; }
+.tec-left  { color: #dc2626; }
+.tec-toggle-label { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: #64748b; cursor: pointer; white-space: nowrap; }
 
 .tec-actions { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
 .tec-btn { padding: 0.375rem 0.875rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; transition: background 0.12s; }
@@ -55,6 +59,8 @@
 .tec-btn--edit:hover { background: #e2e8f0; }
 .tec-btn--deactivate       { background: #fef2f2; color: #dc2626; }
 .tec-btn--deactivate:hover { background: #fee2e2; }
+.tec-btn--reassign         { background: #f0fdf4; color: #15803d; }
+.tec-btn--reassign:hover   { background: #dcfce7; }
 .tec-btn--cancel { background: #f1f5f9; color: #475569; }
 .tec-btn--save   { background: #6366f1; color: #fff; }
 .tec-btn--save:hover { background: #4f46e5; }

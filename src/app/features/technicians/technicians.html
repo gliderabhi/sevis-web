@@ -3,7 +3,7 @@
   <div class="tec-header">
     <div>
       <h1 class="tec-title">Technicians</h1>
-      <p class="tec-subtitle">Manage workshop technicians</p>
+      <p class="tec-subtitle">Manage workshop technicians and dealer assignments</p>
     </div>
     <button class="tec-add-btn" (click)="openAdd()">
       <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="15" height="15">
@@ -22,6 +22,10 @@
              [ngModel]="search()" (ngModelChange)="search.set($event)" />
       @if (search()) { <button class="tec-search-clear" (click)="search.set('')">✕</button> }
     </div>
+    <label class="tec-toggle-label">
+      <input type="checkbox" [ngModel]="showInactive()" (ngModelChange)="showInactive.set($event)" />
+      Show inactive
+    </label>
     @if (!loading()) {
       <span class="tec-count">{{ filtered().length }} technician{{ filtered().length === 1 ? '' : 's' }}</span>
     }
@@ -48,13 +52,19 @@
           @if (t.specialisation) {
             <div class="tec-spec">{{ t.specialisation.replace('_', ' ') }}</div>
           }
-          @if (t.phone) {
-            <div class="tec-phone">{{ t.phone }}</div>
-          }
+          @if (t.phone) { <div class="tec-phone">{{ t.phone }}</div> }
+          @if (t.panNumber) { <div class="tec-id">PAN: {{ t.panNumber }}</div> }
+          @if (t.aadhaarNumber) { <div class="tec-id">Aadhaar: ••••&nbsp;{{ t.aadhaarNumber.slice(-4) }}</div> }
+          <div class="tec-dates">
+            @if (t.joinedDate) { <span>Joined {{ fmtDate(t.joinedDate) }}</span> }
+            @if (!t.active && t.leftDate) { <span class="tec-left">· Left {{ fmtDate(t.leftDate) }}</span> }
+          </div>
           <div class="tec-actions">
-            <button class="tec-btn tec-btn--edit" (click)="openEdit(t)">Edit</button>
             @if (t.active) {
+              <button class="tec-btn tec-btn--edit" (click)="openEdit(t)">Edit</button>
               <button class="tec-btn tec-btn--deactivate" (click)="deactivate(t)">Deactivate</button>
+            } @else {
+              <button class="tec-btn tec-btn--reassign" (click)="reassign(t)">Re-activate</button>
             }
           </div>
         </div>
@@ -92,21 +102,22 @@
             <input type="text" [ngModel]="form().phone" (ngModelChange)="form.update(f => ({...f, phone: $event}))" placeholder="Mobile number" />
           </div>
           <div class="tec-field">
+            <label>PAN Number</label>
+            <input type="text" [ngModel]="form().panNumber" (ngModelChange)="form.update(f => ({...f, panNumber: $event}))" placeholder="ABCDE1234F" style="text-transform:uppercase;" />
+          </div>
+        </div>
+        <div class="tec-field-row">
+          <div class="tec-field">
+            <label>Aadhaar Number</label>
+            <input type="text" [ngModel]="form().aadhaarNumber" (ngModelChange)="form.update(f => ({...f, aadhaarNumber: $event}))" placeholder="1234 5678 9012" />
+          </div>
+          <div class="tec-field">
             <label>Specialisation</label>
             <select [ngModel]="form().specialisation" (ngModelChange)="form.update(f => ({...f, specialisation: $event}))">
               @for (s of specialisations; track s) { <option [value]="s">{{ s }}</option> }
             </select>
           </div>
         </div>
-        @if (editingId()) {
-          <div class="tec-field">
-            <label>Status</label>
-            <select [ngModel]="form().active" (ngModelChange)="form.update(f => ({...f, active: $event === 'true' || $event === true}))">
-              <option [value]="true">Active</option>
-              <option [value]="false">Inactive</option>
-            </select>
-          </div>
-        }
       </div>
       <div class="tec-modal-footer">
         <button class="tec-btn tec-btn--cancel" (click)="closeForm()">Cancel</button>
