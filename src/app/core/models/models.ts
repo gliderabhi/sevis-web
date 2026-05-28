@@ -35,7 +35,12 @@ export interface BillingInfo {
   labourTotal: number; partsTotal: number; ancillaryTotal: number; subTotal: number;
   discount: number; taxableAmount: number; cgstRate: number; cgstAmount: number;
   sgstRate: number; sgstAmount: number; igstRate: number; igstAmount: number;
-  grandTotal: number; advanceAmount: number; balanceDue: number; paymentType: string;
+  grandTotal: number; advanceAmount: number; balanceDue: number;
+  paymentType: string; paymentStatus: string;
+}
+export interface InvoiceInfo {
+  id: number; invoiceNumber: string; invoiceDate?: string;
+  originalJobCardNumber?: string; grandTotal?: number; paymentMethod?: string;
 }
 export interface JobCardDetail {
   id: number; jobCardNumber: string; serviceType: string; status: string;
@@ -44,6 +49,7 @@ export interface JobCardDetail {
   customer: CustomerInfo; vehicle: VehicleInfo;
   labourItems: LabourItemInfo[]; parts: PartItemInfo[];
   ancillaryItems: AncillaryItemInfo[]; checks?: ChecksInfo; billing?: BillingInfo;
+  invoice?: InvoiceInfo;
 }
 
 // Create request shapes
@@ -74,3 +80,20 @@ export interface InvoiceDetail {
 
 // ── Users ─────────────────────────────────────────────────────────────────────
 export interface AppUser { id: number; name: string; email: string; phone?: string; role?: string; }
+
+// ── Stock ─────────────────────────────────────────────────────────────────────
+export interface StockItem {
+  id: number; partNumber: string; quantity: number; purchasePrice?: number;
+  description: string; mrpPrice: number; uom: string; productGroup: string;
+}
+
+// ── Parts Catalogue ───────────────────────────────────────────────────────────
+export interface Part {
+  id: number; partNumber: string; description: string;
+  mrpPrice: number; purchasePrice: number;
+  uom: string; productGroup: string; hsnCode: string; taxSlab: string;
+}
+
+export interface PagedResponse<T> {
+  content: T[]; totalElements: number; totalPages: number; last: boolean; number: number;
+}

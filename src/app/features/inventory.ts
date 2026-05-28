@@ -1,16 +1,19 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api';
-import { InventoryItem } from '../core/models/models';
+import { InventoryItem, Part } from '../core/models/models';
+import { PartPickerComponent } from '../shared/components/part-picker';
 
 @Component({
   selector: 'app-inventory',
-  imports: [FormsModule],
+  imports: [FormsModule, PartPickerComponent],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css',
 })
 export class InventoryComponent implements OnInit {
   private api = inject(ApiService);
+
+  @ViewChild(PartPickerComponent) partPicker?: PartPickerComponent;
 
   items = signal<InventoryItem[]>([]);
   loading = signal(true);
@@ -23,6 +26,17 @@ export class InventoryComponent implements OnInit {
 
   // Form model
   form: Partial<InventoryItem> = { name: '', sku: '', quantity: 0, price: 0 };
+
+  onPartSelected(part: Part): void {
+    this.form.name = part.description;
+    this.form.sku = part.partNumber;
+    if (part.mrpPrice) this.form.price = part.mrpPrice;
+  }
+
+  onPartCleared(): void {
+    this.form.name = '';
+    this.form.sku = '';
+  }
 
   stockValue = computed(() =>
     this.items().reduce((sum, i) => sum + i.quantity * i.price, 0)
@@ -54,6 +68,7 @@ export class InventoryComponent implements OnInit {
     this.selectedItem.set(null);
     this.form = { name: '', sku: '', quantity: 0, price: 0 };
     this.formError.set('');
+    this.partPicker?.clear();
     this.showForm.set(true);
   }
 

@@ -1,0 +1,155 @@
+<div class="pc-page">
+
+  <!-- Header -->
+  <div class="pc-header">
+    <div>
+      <h1 class="pc-title">Parts Catalogue</h1>
+      <p class="pc-subtitle">
+        @if (totalElements() > 0) {
+          {{ totalElements().toLocaleString() }} parts in catalogue
+        } @else {
+          Master parts catalogue
+        }
+      </p>
+    </div>
+  </div>
+
+  <!-- Search + Filter bar -->
+  <div class="pc-toolbar">
+    <div class="pc-search-wrap">
+      <svg class="pc-search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input class="pc-search-input" type="text" placeholder="Search by part number or description…"
+             [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)"/>
+      @if (searching()) {
+        <svg class="pc-search-spinner" width="16" height="16" fill="none" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="#e2e8f0" stroke-width="3"/>
+          <path fill="#2563eb" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+      } @else if (searchQuery()) {
+        <button class="pc-search-clear" (click)="clearSearch()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    @if (!isSearchMode() && uniqueGroups().length > 0) {
+      <select class="pc-group-select" [value]="selectedGroup()" (change)="selectedGroup.set($any($event.target).value)">
+        <option value="">All Groups</option>
+        @for (g of uniqueGroups(); track g) {
+          <option [value]="g">{{ g }}</option>
+        }
+      </select>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="pc-loading">
+      <div class="pc-spinner"></div>
+      Loading catalogue…
+    </div>
+  } @else if (error()) {
+    <div class="pc-error">{{ error() }}</div>
+  } @else if (filteredParts().length === 0) {
+    <div class="pc-empty">
+      <svg width="44" height="44" fill="none" stroke="#cbd5e1" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+      </svg>
+      <p>No parts found{{ searchQuery() ? ' for "' + searchQuery() + '"' : '' }}</p>
+    </div>
+  } @else {
+
+    <!-- Parts table -->
+    <div class="pc-table-card">
+      <div class="pc-table-wrap">
+        <table class="pc-table">
+          <thead>
+            <tr>
+              <th>Part Number</th>
+              <th>Description</th>
+              <th>Group</th>
+              <th class="text-right">MRP</th>
+              <th class="text-right">Purchase Price</th>
+              <th>UoM</th>
+              <th>HSN</th>
+              <th>Tax</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (part of filteredParts(); track part.id) {
+              <tr>
+                <td>
+                  <span class="pc-part-number">{{ part.partNumber }}</span>
+                </td>
+                <td class="pc-description">{{ part.description }}</td>
+                <td>
+                  @if (part.productGroup) {
+                    <span class="pc-group-badge">{{ part.productGroup }}</span>
+                  } @else {
+                    <span class="pc-dash">—</span>
+                  }
+                </td>
+                <td class="text-right pc-mrp">{{ fmt(part.mrpPrice) }}</td>
+                <td class="text-right pc-purchase">{{ fmt(part.purchasePrice) }}</td>
+                <td>
+                  @if (part.uom) {
+                    <span class="pc-meta-tag">{{ part.uom }}</span>
+                  } @else {
+                    <span class="pc-dash">—</span>
+                  }
+                </td>
+                <td>
+                  @if (part.hsnCode) {
+                    <span class="pc-meta-tag">{{ part.hsnCode }}</span>
+                  } @else {
+                    <span class="pc-dash">—</span>
+                  }
+                </td>
+                <td>
+                  @if (part.taxSlab) {
+                    <span class="pc-tax-badge">{{ part.taxSlab }}</span>
+                  } @else {
+                    <span class="pc-dash">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Load more / pagination footer -->
+      @if (!isSearchMode()) {
+        <div class="pc-footer">
+          <span class="pc-count-info">
+            Showing {{ filteredParts().length }} of {{ totalElements().toLocaleString() }} parts
+          </span>
+          @if (hasMore()) {
+            <button class="pc-load-more" (click)="loadMore()" [disabled]="loadingMore()">
+              @if (loadingMore()) {
+                <svg class="pc-btn-spinner" width="14" height="14" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="rgba(37,99,235,0.2)" stroke-width="3"/>
+                  <path fill="#2563eb" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Loading…
+              } @else {
+                Load more
+              }
+            </button>
+          } @else if (filteredParts().length > 0) {
+            <span class="pc-all-loaded">All parts loaded</span>
+          }
+        </div>
+      } @else {
+        <div class="pc-footer">
+          <span class="pc-count-info">{{ filteredParts().length }} result{{ filteredParts().length !== 1 ? 's' : '' }} for "{{ searchQuery() }}"</span>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>

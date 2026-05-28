@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   LoginRequest, AuthResponse, AuditSummary,
   JobCardSummary, JobCardDetail, CreateJobCardRequest,
-  InventoryItem, InvoiceDetail, AppUser,
+  InventoryItem, InvoiceDetail, AppUser, Part, PagedResponse, StockItem,
 } from '../models/models';
 
 const BASE = 'http://32.194.147.195:8080';
@@ -28,6 +28,9 @@ export class ApiService {
   getStockValue(): Observable<number> {
     return this.http.get<number>(`${BASE}/inventory-service/api/stock/value`);
   }
+  getStockByPartNumber(partNumber: string): Observable<StockItem> {
+    return this.http.get<StockItem>(`${BASE}/inventory-service/api/stock/${encodeURIComponent(partNumber)}`);
+  }
 
   // ── Job Cards ────────────────────────────────────────────────────────────
   getJobCards(): Observable<JobCardSummary[]> {
@@ -43,6 +46,12 @@ export class ApiService {
     return this.http.patch<JobCardDetail>(
       `${BASE}/orders-service/api/job-cards/${id}/status`, {},
       { params: new HttpParams().set('status', status) }
+    );
+  }
+  updateJobCardPayment(id: number, paymentType: string, paymentStatus: string): Observable<JobCardDetail> {
+    return this.http.patch<JobCardDetail>(
+      `${BASE}/orders-service/api/job-cards/${id}/payment`, {},
+      { params: new HttpParams().set('paymentType', paymentType).set('paymentStatus', paymentStatus) }
     );
   }
   addLabour(id: number, body: object): Observable<JobCardDetail> {
@@ -83,10 +92,22 @@ export class ApiService {
 
   // ── Invoices ─────────────────────────────────────────────────────────────
   getInvoices(): Observable<InvoiceDetail[]> {
-    return this.http.get<InvoiceDetail[]>(`${BASE}/billing-service/api/invoices`);
+    return this.http.get<InvoiceDetail[]>(`${BASE}/orders-service/api/invoices`);
   }
   getInvoice(id: number): Observable<InvoiceDetail> {
-    return this.http.get<InvoiceDetail>(`${BASE}/billing-service/api/invoices/${id}`);
+    return this.http.get<InvoiceDetail>(`${BASE}/orders-service/api/invoices/${id}`);
+  }
+
+  // ── Parts Catalogue ───────────────────────────────────────────────────────
+  getParts(page: number, size: number): Observable<PagedResponse<Part>> {
+    return this.http.get<PagedResponse<Part>>(`${BASE}/inventory-service/api/parts`, {
+      params: new HttpParams().set('page', page).set('size', size),
+    });
+  }
+  searchParts(q: string): Observable<Part[]> {
+    return this.http.get<Part[]>(`${BASE}/inventory-service/api/parts/search`, {
+      params: new HttpParams().set('q', q).set('size', 20),
+    });
   }
 
   // ── Users ─────────────────────────────────────────────────────────────────

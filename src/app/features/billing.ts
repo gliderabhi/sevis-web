@@ -1,10 +1,11 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api';
 import { InvoiceDetail } from '../core/models/models';
 
 @Component({
   selector: 'app-billing',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './billing.html',
   styleUrl: './billing.css',
 })
@@ -16,6 +17,18 @@ export class BillingComponent implements OnInit {
   error = signal('');
   selectedInvoice = signal<InvoiceDetail | null>(null);
   detailLoading = signal(false);
+  search = signal('');
+
+  filteredInvoices = computed(() => {
+    const q = this.search().toLowerCase().trim();
+    if (!q) return this.invoices();
+    return this.invoices().filter(inv =>
+      inv.invoiceNumber?.toLowerCase().includes(q) ||
+      inv.originalJobCardNumber?.toLowerCase().includes(q) ||
+      inv.vehicleRegNo?.toLowerCase().includes(q) ||
+      inv.serviceType?.toLowerCase().includes(q)
+    );
+  });
 
   ngOnInit(): void {
     this.api.getInvoices().subscribe({
@@ -23,14 +36,16 @@ export class BillingComponent implements OnInit {
         this.invoices.set(list);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Failed to load invoices.');
+      error: (err) => {
+        const msg = err?.error?.message ?? err?.message ?? `Server error (${err?.status ?? 'unknown'})`;
+        this.error.set(`Failed to load invoices. ${msg}`);
         this.loading.set(false);
       },
     });
   }
 
   openInvoice(inv: InvoiceDetail): void {
+    this.selectedInvoice.set(inv);
     this.detailLoading.set(true);
     this.api.getInvoice(inv.id).subscribe({
       next: (detail) => {
@@ -38,7 +53,6 @@ export class BillingComponent implements OnInit {
         this.detailLoading.set(false);
       },
       error: () => {
-        this.selectedInvoice.set(inv);
         this.detailLoading.set(false);
       },
     });
@@ -56,5 +70,10 @@ export class BillingComponent implements OnInit {
   fmtDate(d: string | undefined): string {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  labelOf(s: string | undefined): string {
+    if (!s) return '—';
+    return s.replace(/_/g, ' ');
   }
 }

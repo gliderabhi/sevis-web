@@ -1,11 +1,12 @@
 import { Component, inject, signal, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import Chart from 'chart.js/auto';
 import { ApiService } from '../core/services/api';
 import { AuditSummary } from '../core/models/models';
 
 @Component({
   selector: 'app-reports',
-  imports: [],
+  imports: [DecimalPipe],
   templateUrl: './reports.html',
   styleUrl: './reports.css',
 })

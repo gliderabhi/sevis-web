@@ -13,6 +13,7 @@ export const routes: Routes = [
       { path: 'job-cards', loadComponent: () => import('./features/job-cards/job-card-list').then(m => m.JobCardListComponent) },
       { path: 'job-cards/new', loadComponent: () => import('./features/job-cards/job-card-create').then(m => m.JobCardCreateComponent) },
       { path: 'job-cards/:id', loadComponent: () => import('./features/job-cards/job-card-detail').then(m => m.JobCardDetailComponent) },
+      { path: 'parts',     loadComponent: () => import('./features/parts/parts-catalogue').then(m => m.PartsCatalogueComponent) },
       { path: 'inventory', loadComponent: () => import('./features/inventory').then(m => m.InventoryComponent) },
       { path: 'billing',   loadComponent: () => import('./features/billing').then(m => m.BillingComponent) },
       { path: 'reports',   loadComponent: () => import('./features/reports').then(m => m.ReportsComponent) },
