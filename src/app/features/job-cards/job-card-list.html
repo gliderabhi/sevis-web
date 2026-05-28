@@ -1,0 +1,95 @@
+<div class="p-6 space-y-5">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-bold text-slate-800">Job Cards</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Manage all service job cards</p>
+    </div>
+    <button class="btn btn-primary" (click)="goNew()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      New Job Card
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card p-4 space-y-3">
+    <!-- Status filter buttons -->
+    <div class="flex flex-wrap gap-2">
+      @for (s of statuses; track s) {
+        <button
+          class="btn btn-sm"
+          [class]="activeStatus() === s ? 'btn-primary' : 'btn-secondary'"
+          (click)="setStatus(s)"
+        >
+          {{ labelOf(s) }}
+        </button>
+      }
+    </div>
+    <!-- Search -->
+    <div class="relative max-w-sm">
+      <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search by JC#, customer, vehicle…"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        class="form-input pl-9"
+      />
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card overflow-x-auto">
+    @if (loading()) {
+      <div class="flex items-center justify-center h-40 text-slate-400 text-sm">Loading…</div>
+    } @else if (error()) {
+      <div class="p-4 text-red-600 text-sm">{{ error() }}</div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>JC #</th>
+            <th>Customer</th>
+            <th>Vehicle</th>
+            <th>Service Type</th>
+            <th>Status</th>
+            <th>Date In</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (card of filtered(); track card.id) {
+            <tr class="cursor-pointer" [routerLink]="['/job-cards', card.id]">
+              <td class="font-mono text-xs font-semibold text-slate-700">{{ card.jobCardNumber }}</td>
+              <td>
+                <p class="font-medium text-slate-800 text-sm">{{ card.customerName }}</p>
+                <p class="text-xs text-slate-400 mt-0.5">{{ card.customerPhone }}</p>
+              </td>
+              <td>
+                <p class="font-medium text-slate-800 text-sm">{{ card.vehicleRegNumber }}</p>
+                <p class="text-xs text-slate-400 mt-0.5">{{ card.vehicleMakeModel }}</p>
+              </td>
+              <td class="text-sm text-slate-600">{{ labelOf(card.serviceType) }}</td>
+              <td><app-status-badge [status]="card.status"/></td>
+              <td class="text-sm text-slate-500">{{ fmtDate(card.dateIn) }}</td>
+              <td class="text-right font-semibold text-slate-700">{{ fmt(card.grandTotal) }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center text-slate-400 py-10">No job cards found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Count -->
+  @if (!loading() && !error()) {
+    <p class="text-xs text-slate-400 text-right">Showing {{ filtered().length }} of {{ cards().length }} records</p>
+  }
+</div>

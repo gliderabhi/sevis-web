@@ -1,0 +1,160 @@
+<div class="p-6 space-y-5">
+  <!-- Header -->
+  <div>
+    <h1 class="text-xl font-bold text-slate-800">Billing &amp; Invoices</h1>
+    <p class="text-sm text-slate-500 mt-0.5">View and manage all invoices</p>
+  </div>
+
+  <!-- Table -->
+  <div class="card overflow-x-auto">
+    @if (loading()) {
+      <div class="flex items-center justify-center h-40 text-slate-400 text-sm">Loading invoices…</div>
+    } @else if (error()) {
+      <div class="p-4 text-red-600 text-sm">{{ error() }}</div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Job Card #</th>
+            <th>Date</th>
+            <th>Vehicle Reg</th>
+            <th>Service Type</th>
+            <th>Payment</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of invoices(); track inv.id) {
+            <tr class="cursor-pointer" (click)="openInvoice(inv)">
+              <td class="font-mono text-xs font-semibold text-slate-700">{{ inv.invoiceNumber }}</td>
+              <td class="font-mono text-xs text-slate-500">{{ inv.originalJobCardNumber ?? '—' }}</td>
+              <td class="text-sm text-slate-500">{{ fmtDate(inv.invoiceDate) }}</td>
+              <td class="font-medium text-slate-700">{{ inv.vehicleRegNo ?? '—' }}</td>
+              <td class="text-sm text-slate-600">{{ inv.serviceType ? inv.serviceType.replace(/_/g, ' ') : '—' }}</td>
+              <td>
+                @if (inv.paymentMethod) {
+                  <span class="badge" [class]="'badge-' + inv.paymentMethod">{{ inv.paymentMethod }}</span>
+                } @else {
+                  <span class="text-slate-400 text-xs">—</span>
+                }
+              </td>
+              <td class="text-right font-semibold text-slate-800">{{ fmt(inv.grandTotal) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="text-center text-slate-400 py-10">No invoices found.</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Invoice Detail Overlay -->
+@if (selectedInvoice(); as inv) {
+  <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-start justify-end z-50"
+       (click)="closeDetail()">
+    <div class="h-full w-full max-w-2xl bg-white shadow-2xl overflow-y-auto flex flex-col"
+         (click)="$event.stopPropagation()">
+      <!-- Panel Header -->
+      <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800 font-mono">{{ inv.invoiceNumber }}</h2>
+          <p class="text-xs text-slate-500 mt-0.5">{{ fmtDate(inv.invoiceDate) }} &bull; {{ inv.vehicleRegNo }} &bull; {{ inv.serviceType ? inv.serviceType.replace(/_/g, ' ') : '' }}</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" (click)="closeDetail()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6 flex-1">
+        <!-- Meta info -->
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          @if (inv.originalJobCardNumber) {
+            <div class="card p-3">
+              <p class="text-xs text-slate-500">Job Card</p>
+              <p class="font-semibold text-slate-800 font-mono mt-0.5">{{ inv.originalJobCardNumber }}</p>
+            </div>
+          }
+          @if (inv.preparedBy) {
+            <div class="card p-3">
+              <p class="text-xs text-slate-500">Prepared By</p>
+              <p class="font-semibold text-slate-800 mt-0.5">{{ inv.preparedBy }}</p>
+            </div>
+          }
+          @if (inv.kms) {
+            <div class="card p-3">
+              <p class="text-xs text-slate-500">KMs</p>
+              <p class="font-semibold text-slate-800 mt-0.5">{{ inv.kms?.toLocaleString('en-IN') }}</p>
+            </div>
+          }
+          @if (inv.paymentMethod) {
+            <div class="card p-3">
+              <p class="text-xs text-slate-500">Payment Method</p>
+              <span class="badge mt-1" [class]="'badge-' + inv.paymentMethod">{{ inv.paymentMethod }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Line Items -->
+        <div>
+          <p class="section-title">Line Items</p>
+          <div class="overflow-x-auto rounded-xl border border-slate-100">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Type</th>
+                  <th class="text-right">Qty</th>
+                  <th class="text-right">Rate</th>
+                  <th class="text-right">CGST</th>
+                  <th class="text-right">SGST</th>
+                  <th class="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (li of inv.lineItems; track li.id) {
+                  <tr>
+                    <td>{{ li.description ?? '—' }}</td>
+                    <td class="text-xs text-slate-500">{{ li.type ?? '—' }}</td>
+                    <td class="text-right">{{ li.quantity ?? '—' }}</td>
+                    <td class="text-right">{{ li.rate != null ? fmt(li.rate) : '—' }}</td>
+                    <td class="text-right text-xs text-slate-500">{{ li.cgstRate != null ? li.cgstRate + '%' : '—' }}</td>
+                    <td class="text-right text-xs text-slate-500">{{ li.sgstRate != null ? li.sgstRate + '%' : '—' }}</td>
+                    <td class="text-right font-medium">{{ li.totalAmount != null ? fmt(li.totalAmount) : '—' }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="7" class="text-center text-slate-400 py-6">No line items</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="max-w-xs ml-auto space-y-2 text-sm">
+          @if (inv.partsNetTaxableAmount != null) {
+            <div class="flex justify-between text-slate-600">
+              <span>Taxable Amount</span><span>{{ fmt(inv.partsNetTaxableAmount) }}</span>
+            </div>
+          }
+          @if (inv.totalTaxAmount != null) {
+            <div class="flex justify-between text-slate-600">
+              <span>Total Tax</span><span>{{ fmt(inv.totalTaxAmount) }}</span>
+            </div>
+          }
+          @if (inv.adjustments != null && inv.adjustments !== 0) {
+            <div class="flex justify-between text-slate-600">
+              <span>Adjustments</span><span>{{ fmt(inv.adjustments) }}</span>
+            </div>
+          }
+          <div class="border-t border-slate-200 pt-2 flex justify-between font-bold text-slate-800 text-base">
+            <span>Grand Total</span><span>{{ fmt(inv.grandTotal) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

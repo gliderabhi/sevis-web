@@ -1,0 +1,323 @@
+<div class="p-6 space-y-6 max-w-6xl mx-auto">
+  <!-- Back -->
+  <button class="btn btn-ghost btn-sm" (click)="goBack()">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Back to Job Cards
+  </button>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center h-48 text-slate-400 text-sm">Loading job card…</div>
+  } @else if (error()) {
+    <div class="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-3 text-sm">{{ error() }}</div>
+  } @else if (card(); as jc) {
+
+    <!-- Header -->
+    <div class="card p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <h1 class="text-xl font-bold text-slate-800 font-mono">{{ jc.jobCardNumber }}</h1>
+            <app-status-badge [status]="jc.status"/>
+          </div>
+          <p class="text-sm text-slate-500 mt-1">{{ labelOf(jc.serviceType) }} &bull; Date In: {{ fmtDate(jc.dateIn) }} &bull; KM: {{ jc.kmIn?.toLocaleString('en-IN') }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Download PDF
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="card p-5">
+      <p class="section-title">Status Timeline</p>
+      <div class="flex items-center gap-0 overflow-x-auto pb-2">
+        @for (step of statusSteps; track step; let last = $last) {
+          <div class="flex items-center shrink-0">
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                [class]="
+                  stepState(step) === 'done'    ? 'bg-emerald-500 text-white' :
+                  stepState(step) === 'current' ? 'bg-blue-600 text-white ring-4 ring-blue-100' :
+                                                  'bg-slate-100 text-slate-400'
+                ">
+                @if (stepState(step) === 'done') {
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                } @else {
+                  {{ $index + 1 }}
+                }
+              </div>
+              <span class="text-[10px] font-medium whitespace-nowrap"
+                [class]="
+                  stepState(step) === 'current' ? 'text-blue-600' :
+                  stepState(step) === 'done'    ? 'text-emerald-600' :
+                                                  'text-slate-400'
+                ">
+                {{ labelOf(step) }}
+              </span>
+            </div>
+            @if (!last) {
+              <div class="h-0.5 w-8 mx-1 mb-4"
+                [class]="stepState(step) === 'done' ? 'bg-emerald-400' : 'bg-slate-200'">
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Customer + Vehicle -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Customer -->
+      <div class="card p-5 space-y-3">
+        <p class="section-title">Customer</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Name</span>
+            <span class="font-medium text-slate-800">{{ jc.customer.name }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Phone</span>
+            <span class="font-medium text-slate-800">{{ jc.customer.phone }}</span>
+          </div>
+          @if (jc.customer.email) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Email</span>
+              <span class="font-medium text-slate-800">{{ jc.customer.email }}</span>
+            </div>
+          }
+          @if (jc.customer.address) {
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-500 shrink-0">Address</span>
+              <span class="font-medium text-slate-800 text-right">{{ jc.customer.address }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Vehicle -->
+      <div class="card p-5 space-y-3">
+        <p class="section-title">Vehicle</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Reg Number</span>
+            <span class="font-bold font-mono text-slate-800">{{ jc.vehicle.regNumber }}</span>
+          </div>
+          @if (jc.vehicle.make || jc.vehicle.model) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Make / Model</span>
+              <span class="font-medium text-slate-800">{{ jc.vehicle.make }} {{ jc.vehicle.model }}</span>
+            </div>
+          }
+          @if (jc.vehicle.variant) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Variant</span>
+              <span class="font-medium text-slate-800">{{ jc.vehicle.variant }}</span>
+            </div>
+          }
+          @if (jc.vehicle.year) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Year</span>
+              <span class="font-medium text-slate-800">{{ jc.vehicle.year }}</span>
+            </div>
+          }
+          @if (jc.vehicle.fuelType) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Fuel Type</span>
+              <span class="font-medium text-slate-800">{{ jc.vehicle.fuelType }}</span>
+            </div>
+          }
+          @if (jc.vehicle.color) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">Color</span>
+              <span class="font-medium text-slate-800">{{ jc.vehicle.color }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Complaint -->
+    @if (jc.customerComplaint) {
+      <div class="card p-5">
+        <p class="section-title">Customer Complaint</p>
+        <p class="text-sm text-slate-700 leading-relaxed">{{ jc.customerComplaint }}</p>
+      </div>
+    }
+
+    <!-- Labour Items -->
+    <div class="card">
+      <div class="px-5 pt-5 pb-3">
+        <p class="section-title">Labour Items</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Type</th>
+              <th class="text-right">Qty</th>
+              <th class="text-right">Rate</th>
+              <th class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of jc.labourItems; track l.id) {
+              <tr>
+                <td>{{ l.description }}</td>
+                <td class="text-slate-500 text-xs">{{ l.type }}</td>
+                <td class="text-right">{{ l.quantity }}</td>
+                <td class="text-right">{{ fmt(l.rate) }}</td>
+                <td class="text-right font-medium">{{ fmt(l.amount) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="text-center text-slate-400 py-6">No labour items</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Parts -->
+    <div class="card">
+      <div class="px-5 pt-5 pb-3">
+        <p class="section-title">Parts</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Part #</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th class="text-right">Qty</th>
+              <th class="text-right">Unit Price</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of jc.parts; track p.id) {
+              <tr>
+                <td class="font-mono text-xs text-slate-500">{{ p.partNumber }}</td>
+                <td>{{ p.description }}</td>
+                <td class="text-xs text-slate-500">{{ p.partType }}</td>
+                <td class="text-right">{{ p.quantity }}</td>
+                <td class="text-right">{{ fmt(p.unitPrice) }}</td>
+                <td class="text-right font-medium">{{ fmt(p.totalPrice) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="text-center text-slate-400 py-6">No parts</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Ancillary -->
+    <div class="card">
+      <div class="px-5 pt-5 pb-3">
+        <p class="section-title">Ancillary Items</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of jc.ancillaryItems; track a.id) {
+              <tr>
+                <td>{{ a.description }}</td>
+                <td class="text-right font-medium">{{ fmt(a.amount) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="2" class="text-center text-slate-400 py-6">No ancillary items</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Billing Summary -->
+    @if (jc.billing; as b) {
+      <div class="card p-6">
+        <p class="section-title">Billing Summary</p>
+        <div class="max-w-sm ml-auto space-y-2 text-sm">
+          <div class="flex justify-between text-slate-600">
+            <span>Labour</span><span>{{ fmt(b.labourTotal) }}</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Parts</span><span>{{ fmt(b.partsTotal) }}</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Ancillary</span><span>{{ fmt(b.ancillaryTotal) }}</span>
+          </div>
+          @if (b.discount) {
+            <div class="flex justify-between text-red-600">
+              <span>Discount</span><span>- {{ fmt(b.discount) }}</span>
+            </div>
+          }
+          <div class="flex justify-between text-slate-600">
+            <span>CGST ({{ b.cgstRate }}%)</span><span>{{ fmt(b.cgstAmount) }}</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>SGST ({{ b.sgstRate }}%)</span><span>{{ fmt(b.sgstAmount) }}</span>
+          </div>
+          <div class="border-t border-slate-200 pt-2 flex justify-between font-bold text-slate-800 text-base">
+            <span>Grand Total</span><span>{{ fmt(b.grandTotal) }}</span>
+          </div>
+          @if (b.advanceAmount) {
+            <div class="flex justify-between text-slate-600">
+              <span>Advance Paid</span><span>{{ fmt(b.advanceAmount) }}</span>
+            </div>
+            <div class="flex justify-between font-semibold" [class]="b.balanceDue > 0 ? 'text-red-600' : 'text-emerald-600'">
+              <span>Balance Due</span><span>{{ fmt(b.balanceDue) }}</span>
+            </div>
+          }
+          @if (b.paymentType) {
+            <div class="flex justify-between text-slate-500">
+              <span>Payment</span><span class="badge" [class]="'badge-' + b.paymentType">{{ b.paymentType }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Update Status -->
+    <div class="card p-5">
+      <p class="section-title">Update Status</p>
+      @if (updateError()) {
+        <div class="text-red-600 text-sm mb-3">{{ updateError() }}</div>
+      }
+      <div class="flex items-center gap-3 flex-wrap">
+        <select [(ngModel)]="newStatus" class="form-input max-w-xs">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ labelOf(s) }}</option>
+          }
+        </select>
+        <button class="btn btn-primary" (click)="updateStatus()" [disabled]="updating() || newStatus === jc.status">
+          @if (updating()) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Updating…
+          } @else {
+            Update Status
+          }
+        </button>
+      </div>
+    </div>
+
+  }
+</div>

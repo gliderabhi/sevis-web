@@ -1,0 +1,121 @@
+<div class="p-6 space-y-6">
+  <!-- Header -->
+  <div>
+    <h1 class="text-xl font-bold text-slate-800">Reports</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Business performance overview</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center h-48 text-slate-400 text-sm">Loading reports…</div>
+  } @else if (error()) {
+    <div class="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-3 text-sm">{{ error() }}</div>
+  } @else if (summary(); as s) {
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="card p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Revenue</p>
+        <p class="text-2xl font-bold text-emerald-600 mt-2">{{ fmt(s.totalRevenue) }}</p>
+        <p class="text-xs text-slate-400 mt-1">All time</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">This Month</p>
+        <p class="text-2xl font-bold text-blue-600 mt-2">{{ fmt(s.revenueThisMonth) }}</p>
+        <p class="text-xs text-slate-400 mt-1">{{ s.invoicesThisMonth }} invoices</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Job Cards</p>
+        <p class="text-2xl font-bold text-slate-800 mt-2">{{ s.totalJobCards }}</p>
+        <p class="text-xs text-slate-400 mt-1">{{ s.totalInvoices }} invoiced</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Invoice</p>
+        <p class="text-2xl font-bold text-slate-800 mt-2">{{ fmt(s.averageInvoiceValue) }}</p>
+        <p class="text-xs text-slate-400 mt-1">Per invoice</p>
+      </div>
+    </div>
+
+    <!-- Revenue Breakdown KPI row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card p-4">
+        <p class="text-xs text-slate-500">Labour Revenue</p>
+        <p class="text-xl font-bold text-blue-600 mt-1">{{ fmt(s.labourChargesTotal) }}</p>
+        <div class="h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+          <div class="h-full bg-blue-500 rounded-full" [style.width.%]="s.totalRevenue ? (s.labourChargesTotal / s.totalRevenue * 100) : 0"></div>
+        </div>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate-500">Parts Revenue</p>
+        <p class="text-xl font-bold text-emerald-600 mt-1">{{ fmt(s.partsRevenueTotal) }}</p>
+        <div class="h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+          <div class="h-full bg-emerald-500 rounded-full" [style.width.%]="s.totalRevenue ? (s.partsRevenueTotal / s.totalRevenue * 100) : 0"></div>
+        </div>
+      </div>
+      <div class="card p-4">
+        <p class="text-xs text-slate-500">Ancillary Revenue</p>
+        <p class="text-xl font-bold text-amber-600 mt-1">{{ fmt(s.ancillaryRevenueTotal) }}</p>
+        <div class="h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+          <div class="h-full bg-amber-500 rounded-full" [style.width.%]="s.totalRevenue ? (s.ancillaryRevenueTotal / s.totalRevenue * 100) : 0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Revenue Breakdown bar -->
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Revenue Breakdown</h3>
+        <div class="h-56">
+          <canvas #revenueBarCanvas></canvas>
+        </div>
+      </div>
+
+      <!-- Status Doughnut -->
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Status Distribution</h3>
+        <div class="flex items-center justify-center h-56">
+          <canvas #statusDoughnutCanvas></canvas>
+        </div>
+      </div>
+
+      <!-- MoM bar -->
+      <div class="card p-5">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Month-on-Month Comparison</h3>
+        <div class="h-56">
+          <canvas #momBarCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status breakdown table -->
+    <div class="card p-5">
+      <p class="section-title">Job Card Status Breakdown</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-1">
+        <div class="text-center p-3 bg-slate-50 rounded-xl">
+          <p class="text-2xl font-bold text-slate-600">{{ s.openJobCards }}</p>
+          <p class="text-xs text-slate-400 mt-1">Received</p>
+        </div>
+        <div class="text-center p-3 bg-blue-50 rounded-xl">
+          <p class="text-2xl font-bold text-blue-600">{{ s.inProgressJobCards }}</p>
+          <p class="text-xs text-blue-400 mt-1">In Progress</p>
+        </div>
+        <div class="text-center p-3 bg-emerald-50 rounded-xl">
+          <p class="text-2xl font-bold text-emerald-600">{{ s.readyJobCards }}</p>
+          <p class="text-xs text-emerald-400 mt-1">Ready</p>
+        </div>
+        <div class="text-center p-3 bg-green-50 rounded-xl">
+          <p class="text-2xl font-bold text-green-600">{{ s.deliveredJobCards }}</p>
+          <p class="text-xs text-green-400 mt-1">Delivered</p>
+        </div>
+        <div class="text-center p-3 bg-slate-100 rounded-xl">
+          <p class="text-2xl font-bold text-slate-500">{{ s.closedJobCards }}</p>
+          <p class="text-xs text-slate-400 mt-1">Closed</p>
+        </div>
+        <div class="text-center p-3 bg-indigo-50 rounded-xl">
+          <p class="text-2xl font-bold text-indigo-600">{{ s.totalJobCards }}</p>
+          <p class="text-xs text-indigo-400 mt-1">Total</p>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,140 @@
+<div class="p-6 space-y-5">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-bold text-slate-800">Inventory</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Manage parts and stock</p>
+    </div>
+    <button class="btn btn-primary" (click)="openAdd()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Add Item
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="card p-4">
+      <p class="text-xs text-slate-500">Total Items</p>
+      <p class="text-2xl font-bold text-slate-800 mt-1">{{ items().length }}</p>
+    </div>
+    <div class="card p-4">
+      <p class="text-xs text-slate-500">Low Stock (&lt; 5)</p>
+      <p class="text-2xl font-bold text-red-600 mt-1">{{ lowStockCount() }}</p>
+    </div>
+    <div class="card p-4 col-span-2 md:col-span-1">
+      <p class="text-xs text-slate-500">Total Stock Value</p>
+      <p class="text-2xl font-bold text-emerald-600 mt-1">{{ fmt(stockValue()) }}</p>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card overflow-x-auto">
+    @if (loading()) {
+      <div class="flex items-center justify-center h-40 text-slate-400 text-sm">Loading inventory…</div>
+    } @else if (error()) {
+      <div class="p-4 text-red-600 text-sm">{{ error() }}</div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Name</th>
+            <th class="text-right">Quantity</th>
+            <th class="text-right">Unit Price</th>
+            <th class="text-right">Stock Value</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td class="font-mono text-xs text-slate-500">{{ item.sku }}</td>
+              <td class="font-medium text-slate-800">{{ item.name }}</td>
+              <td class="text-right">
+                <span [class]="item.quantity < 5 ? 'text-red-600 font-bold' : 'text-slate-700'">{{ item.quantity }}</span>
+              </td>
+              <td class="text-right text-slate-700">{{ fmt(item.price) }}</td>
+              <td class="text-right font-medium text-slate-800">{{ fmt(item.quantity * item.price) }}</td>
+              <td class="text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(item)">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 013.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="deleteItem(item)">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="text-center text-slate-400 py-10">No inventory items.</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Form Modal Overlay -->
+@if (showForm()) {
+  <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+       (click)="closeForm()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5"
+         (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-800">{{ selectedItem() ? 'Edit Item' : 'Add Item' }}</h2>
+        <button class="btn btn-ghost btn-sm" (click)="closeForm()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (formError()) {
+        <div class="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2 text-sm">{{ formError() }}</div>
+      }
+
+      <div class="space-y-4">
+        <div>
+          <label class="form-label">Name <span class="text-red-500">*</span></label>
+          <input type="text" [(ngModel)]="form.name" placeholder="Item name" class="form-input"/>
+        </div>
+        <div>
+          <label class="form-label">SKU <span class="text-red-500">*</span></label>
+          <input type="text" [(ngModel)]="form.sku" placeholder="e.g. OIL-5W30" class="form-input"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">Quantity</label>
+            <input type="number" [(ngModel)]="form.quantity" min="0" class="form-input"/>
+          </div>
+          <div>
+            <label class="form-label">Unit Price (₹)</label>
+            <input type="number" [(ngModel)]="form.price" min="0" step="0.01" class="form-input"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveItem()" [disabled]="saving()">
+          @if (saving()) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Saving…
+          } @else {
+            {{ selectedItem() ? 'Save Changes' : 'Add Item' }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
