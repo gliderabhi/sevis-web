@@ -6,7 +6,7 @@
       <h2 style="margin:0;font-size:20px;font-weight:700;color:#1e293b;">Job Cards</h2>
       <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Manage all service job cards</p>
     </div>
-    @if (auth.isAdmin()) {
+    @if (!auth.isTechnician()) {
       <button (click)="goNew()"
         style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
         (mouseenter)="$any($event.target).style.background='#1d4ed8'"
