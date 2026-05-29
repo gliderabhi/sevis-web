@@ -79,6 +79,14 @@ export class ApiService {
   jobCardPdfUrl(id: number): string {
     return `${BASE}/orders-service/api/job-cards/${id}/pdf`;
   }
+  downloadJobCardPdf(id: number, filename: string): void {
+    this.http.get(`${BASE}/orders-service/api/job-cards/${id}/pdf`, { responseType: 'blob' }).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
 
   // ── Inventory ────────────────────────────────────────────────────────────
   getInventory(): Observable<InventoryItem[]> {
@@ -95,11 +103,22 @@ export class ApiService {
   }
 
   // ── Invoices ─────────────────────────────────────────────────────────────
-  getInvoices(): Observable<InvoiceDetail[]> {
-    return this.http.get<InvoiceDetail[]>(`${BASE}/orders-service/api/invoices`);
+  getInvoices(from?: string, to?: string): Observable<InvoiceDetail[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to)   params = params.set('to', to);
+    return this.http.get<InvoiceDetail[]>(`${BASE}/orders-service/api/invoices`, { params });
   }
   getInvoice(id: number): Observable<InvoiceDetail> {
     return this.http.get<InvoiceDetail>(`${BASE}/orders-service/api/invoices/${id}`);
+  }
+  downloadInvoicePdf(id: number, filename: string): void {
+    this.http.get(`${BASE}/orders-service/api/invoices/${id}/pdf`, { responseType: 'blob' }).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    });
   }
   uploadInvoicePdf(pdfBytes: ArrayBuffer): Observable<InvoiceDetail> {
     return this.http.post<InvoiceDetail>(`${BASE}/orders-service/api/invoices/upload`, pdfBytes, {

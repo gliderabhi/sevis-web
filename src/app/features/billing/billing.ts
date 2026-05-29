@@ -10,7 +10,7 @@ import { InvoiceDetail } from '../../core/models/models';
   styleUrl: './billing.css',
 })
 export class BillingComponent implements OnInit {
-  private api = inject(ApiService);
+  api = inject(ApiService);
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -20,6 +20,8 @@ export class BillingComponent implements OnInit {
   selectedInvoice = signal<InvoiceDetail | null>(null);
   detailLoading = signal(false);
   search = signal('');
+  dateFrom = signal('');
+  dateTo = signal('');
 
   // Upload state
   uploading = signal(false);
@@ -42,8 +44,17 @@ export class BillingComponent implements OnInit {
     this.loadInvoices();
   }
 
+  applyDateFilter(): void { this.loadInvoices(); }
+
+  clearDateFilter(): void {
+    this.dateFrom.set('');
+    this.dateTo.set('');
+    this.loadInvoices();
+  }
+
   private loadInvoices(): void {
-    this.api.getInvoices().subscribe({
+    this.loading.set(true);
+    this.api.getInvoices(this.dateFrom() || undefined, this.dateTo() || undefined).subscribe({
       next: (list) => {
         this.invoices.set(list);
         this.loading.set(false);
@@ -120,7 +131,7 @@ export class BillingComponent implements OnInit {
           );
           this.uploading.set(false);
           // Refresh list and open the new invoice
-          this.api.getInvoices().subscribe(list => {
+          this.api.getInvoices(this.dateFrom() || undefined, this.dateTo() || undefined).subscribe(list => {
             this.invoices.set(list);
             this.openInvoice(inv);
           });

@@ -29,7 +29,7 @@
         <div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
         <h3 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">Customer Information</h3>
       </div>
-      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="rg-2" style="padding:20px 24px;">
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:12px;font-weight:600;color:#374151;">Phone <span style="color:#ef4444;">*</span></label>
           <input type="tel" name="custPhone" [(ngModel)]="form.customer.phone" required placeholder="9876543210"
@@ -67,7 +67,7 @@
         <div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
         <h3 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">Vehicle Information</h3>
       </div>
-      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div class="rg-3" style="padding:20px 24px;">
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:12px;font-weight:600;color:#374151;">Registration Number <span style="color:#ef4444;">*</span></label>
           <input type="text" name="regNumber" [(ngModel)]="form.vehicle.regNumber" required placeholder="MH12AB1234"
@@ -138,7 +138,7 @@
         <div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
         <h3 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">Service Details</h3>
       </div>
-      <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div class="rg-3" style="padding:20px 24px;">
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:12px;font-weight:600;color:#374151;">Service Type</label>
           <select name="serviceType" [(ngModel)]="form.serviceType"

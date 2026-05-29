@@ -15,8 +15,9 @@ export class AuthService {
 
   readonly token    = this._token.asReadonly();
   readonly user     = this._user.asReadonly();
-  readonly isLoggedIn = computed(() => !!this._token());
-  readonly isAdmin    = computed(() => ['ADMIN', 'admin'].includes(this._user()?.role ?? ''));
+  readonly isLoggedIn    = computed(() => !!this._token());
+  readonly isAdmin       = computed(() => ['ADMIN', 'admin'].includes(this._user()?.role ?? ''));
+  readonly isTechnician  = computed(() => this._user()?.role === 'TECHNICIAN');
 
   setSession(token: string, user: StoredUser): void {
     localStorage.setItem('sevis_token', token);

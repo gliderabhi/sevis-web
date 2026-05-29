@@ -671,6 +671,15 @@
 
 @keyframes jcd-spin { to { transform: rotate(360deg); } }
 
+@media (max-width: 640px) {
+  .jcd-page { padding: 12px; }
+  .jcd-field-row { grid-template-columns: 1fr; }
+  .jcd-payment-fields { grid-template-columns: 1fr; }
+  .jcd-modal { max-width: 100%; border-radius: 12px; }
+  .jcd-topbar-actions { margin-left: 0; width: 100%; }
+  .jcd-action-btn { font-size: 11px; padding: 7px 10px; }
+}
+
 /* Payment section */
 .jcd-payment-form {}
 .jcd-payment-fields {

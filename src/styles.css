@@ -73,4 +73,28 @@
 
   /* ── Section title ────────────────────────────────────────────────────── */
   .section-title { @apply text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2; }
+
+  /* ── Responsive grids ─────────────────────────────────────────────────── */
+  .rg-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .rg-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .rg-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+
+  /* ── Page header row (title + action button) ──────────────────────────── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* ── Responsive breakpoints ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .rg-4, .rg-3, .rg-2 { grid-template-columns: 1fr !important; }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .rg-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .rg-3 { grid-template-columns: repeat(2, 1fr) !important; }
 }

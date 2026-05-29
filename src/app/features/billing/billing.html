@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <!-- Search -->
+  <!-- Toolbar -->
   <div class="bil-toolbar">
     <div class="bil-search-wrap">
       <svg class="bil-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -20,6 +20,19 @@
         <button class="bil-search-clear" (click)="search.set('')">✕</button>
       }
     </div>
+
+    <!-- Date range -->
+    <div class="bil-date-filter">
+      <label class="bil-date-label">From</label>
+      <input type="date" class="bil-date-input" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" />
+      <label class="bil-date-label">To</label>
+      <input type="date" class="bil-date-input" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" />
+      <button class="bil-date-apply" (click)="applyDateFilter()">Apply</button>
+      @if (dateFrom() || dateTo()) {
+        <button class="bil-date-clear" (click)="clearDateFilter()">Clear</button>
+      }
+    </div>
+
     @if (!loading() && !error()) {
       <span class="bil-count">{{ filteredInvoices().length }} invoice{{ filteredInvoices().length === 1 ? '' : 's' }}</span>
     }
@@ -137,11 +150,20 @@
             @if (inv.serviceType) { &bull; {{ labelOf(inv.serviceType) }} }
           </div>
         </div>
-        <button class="bil-close-btn" (click)="closeDetail()">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
+        <div class="bil-panel-actions">
+          <button class="bil-pdf-btn" (click)="api.downloadInvoicePdf(inv.id, inv.invoiceNumber + '.pdf')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15" height="15">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            </svg>
+            Download PDF
+          </button>
+          <button class="bil-close-btn" (click)="closeDetail()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="bil-panel-body">

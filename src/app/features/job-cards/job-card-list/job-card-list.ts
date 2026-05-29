@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api';
+import { AuthService } from '../../../core/services/auth';
 import { JobCardSummary } from '../../../core/models/models';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 
@@ -16,6 +17,7 @@ const STATUSES = ['ALL', 'RECEIVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'D
 export class JobCardListComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  auth = inject(AuthService);
 
   statuses = STATUSES;
   activeStatus = signal('ALL');

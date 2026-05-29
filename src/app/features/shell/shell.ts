@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -19,6 +19,7 @@ const PAGE_TITLES: Record<string, string> = {
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './shell.html',
+  styleUrl: './shell.css',
 })
 export class ShellComponent {
   auth   = inject(AuthService);
@@ -27,12 +28,17 @@ export class ShellComponent {
 
   today = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
+  sidebarOpen = signal(false);
+
   userInitial = computed(() => (this.auth.user()?.name ?? '?').charAt(0).toUpperCase());
 
   private url = toSignal(
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
-      map(e => (e as NavigationEnd).urlAfterRedirects)
+      map(e => {
+        this.sidebarOpen.set(false);
+        return (e as NavigationEnd).urlAfterRedirects;
+      })
     ),
     { initialValue: this.router.url }
   );
@@ -42,6 +48,8 @@ export class ShellComponent {
     if (u.match(/^\/job-cards\/\d+$/)) return 'Job Card Detail';
     return PAGE_TITLES[u] ?? PAGE_TITLES[u.split('?')[0]] ?? 'Sevis CRM';
   });
+
+  toggleSidebar() { this.sidebarOpen.update(v => !v); }
 
   logout() {
     this.api.logout().subscribe({ complete: () => this.auth.clearSession() });

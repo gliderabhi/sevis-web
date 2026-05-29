@@ -103,3 +103,8 @@
 .tec-pay-badge--paid { background: #dcfce7; color: #15803d; }
 .tec-btn--salary       { background: #ede9fe; color: #6d28d9; }
 .tec-btn--salary:hover { background: #ddd6fe; }
+
+@media (max-width: 640px) {
+  .tec-field-row { grid-template-columns: 1fr; }
+  .tec-toolbar { flex-wrap: wrap; }
+}

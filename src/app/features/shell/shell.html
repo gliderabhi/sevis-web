@@ -1,7 +1,12 @@
-<div style="display:flex;height:100vh;background:#f1f5f9;overflow:hidden;">
+<div class="shell-root">
+
+  <!-- Mobile overlay -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
 
   <!-- Left Sidebar -->
-  <aside style="width:240px;background:#0f172a;display:flex;flex-direction:column;flex-shrink:0;">
+  <aside class="sidebar" [class.sidebar-mobile-open]="sidebarOpen()">
 
     <!-- Logo -->
     <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;">
@@ -20,9 +25,7 @@
     <nav style="flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;">
 
       <a routerLink="/dashboard" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;transition:background 0.15s,color 0.15s;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
+         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;transition:background 0.15s,color 0.15s;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
         </svg>
@@ -30,80 +33,64 @@
       </a>
 
       <a routerLink="/job-cards" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
+         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
         </svg>
         Job Cards
       </a>
 
-      <a routerLink="/parts" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
-        </svg>
-        Parts Catalogue
-      </a>
-
-      <a routerLink="/inventory" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        Inventory
-      </a>
-
-      <a routerLink="/billing" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
-        </svg>
-        Billing
-      </a>
-
-      <a routerLink="/reports" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/>
-        </svg>
-        Reports
-      </a>
-
-      <a routerLink="/technicians" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        Technicians
-      </a>
-
-      <a routerLink="/vehicles" routerLinkActive="nav-active" class="nav-item"
-         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-         (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-         (mouseleave)="$any($event.target).style.background=''">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-1m8 1H3m10 0h4m-4 0l-1-7H3M8 6h5l3 7"/>
-        </svg>
-        Vehicles
-      </a>
-
       @if (auth.isAdmin()) {
+        <a routerLink="/parts" routerLinkActive="nav-active" class="nav-item"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+          </svg>
+          Parts Catalogue
+        </a>
+
+        <a routerLink="/inventory" routerLinkActive="nav-active" class="nav-item"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          Inventory
+        </a>
+
+        <a routerLink="/billing" routerLinkActive="nav-active" class="nav-item"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+          </svg>
+          Billing
+        </a>
+
+        <a routerLink="/reports" routerLinkActive="nav-active" class="nav-item"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/>
+          </svg>
+          Reports
+        </a>
+
+        <a routerLink="/technicians" routerLinkActive="nav-active" class="nav-item"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Technicians
+        </a>
+
+        <a routerLink="/vehicles" routerLinkActive="nav-active" class="nav-item"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-1m8 1H3m10 0h4m-4 0l-1-7H3M8 6h5l3 7"/>
+          </svg>
+          Vehicles
+        </a>
+
         <a routerLink="/users" routerLinkActive="nav-active" class="nav-item"
-           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;"
-           (mouseenter)="$any($event.target).style.background='rgba(255,255,255,0.06)'"
-           (mouseleave)="$any($event.target).style.background=''">
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;text-decoration:none;color:#94a3b8;font-size:13px;font-weight:500;">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
@@ -123,9 +110,7 @@
         <p style="margin:0;color:#64748b;font-size:11px;text-transform:capitalize;">{{ auth.user()?.role }}</p>
       </div>
       <button (click)="logout()" title="Logout"
-              style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;border-radius:4px;display:flex;align-items:center;"
-              (mouseenter)="$any($event.target).style.color='#e2e8f0'"
-              (mouseleave)="$any($event.target).style.color='#64748b'">
+              style="background:none;border:none;cursor:pointer;color:#64748b;padding:4px;border-radius:4px;display:flex;align-items:center;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>
@@ -134,17 +119,23 @@
   </aside>
 
   <!-- Main content area -->
-  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+  <div class="shell-main">
 
     <!-- Top header bar -->
-    <header style="height:56px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;padding:0 24px;flex-shrink:0;">
+    <header class="shell-header">
+      <!-- Hamburger (mobile only) -->
+      <button class="hamburger" (click)="toggleSidebar()" aria-label="Toggle menu">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
       <h1 style="margin:0;font-size:14px;font-weight:600;color:#1e293b;">{{ pageTitle() }}</h1>
       <div style="flex:1;"></div>
-      <span style="font-size:12px;color:#94a3b8;">{{ today }}</span>
+      <span class="header-date">{{ today }}</span>
     </header>
 
     <!-- Page content -->
-    <main style="flex:1;overflow-y:auto;padding:24px;">
+    <main class="shell-content">
       <router-outlet />
     </main>
   </div>

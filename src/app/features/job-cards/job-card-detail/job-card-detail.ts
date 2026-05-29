@@ -2,6 +2,7 @@ import { Component, inject, signal, input, OnInit, ViewChild, computed } from '@
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api';
+import { AuthService } from '../../../core/services/auth';
 import { JobCardDetail as JCDetail, Part, Technician } from '../../../core/models/models';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 import { PartPickerComponent } from '../../../shared/components/part-picker/part-picker';
@@ -17,6 +18,7 @@ const STATUS_STEPS = ['RECEIVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'DELI
 export class JobCardDetailComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  auth = inject(AuthService);
 
   @ViewChild(PartPickerComponent) partPicker?: PartPickerComponent;
 
@@ -119,8 +121,10 @@ export class JobCardDetailComponent implements OnInit {
     });
   }
 
-  pdfUrl(): string {
-    return this.api.jobCardPdfUrl(Number(this.id()));
+  downloadPdf(): void {
+    const card = this.card();
+    const filename = (card?.jobCardNumber ?? 'job-card') + '.pdf';
+    this.api.downloadJobCardPdf(Number(this.id()), filename);
   }
 
   goBack(): void {

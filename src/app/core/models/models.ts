@@ -1,4 +1,5 @@
 // ── Auth ──────────────────────────────────────────────────────────────────────
+export type UserRole = 'ADMIN' | 'TECHNICIAN';
 export interface LoginRequest { email: string; password: string; }
 export interface AuthResponse  { token: string; role: string; name?: string; }
 
