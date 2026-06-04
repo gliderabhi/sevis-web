@@ -8,20 +8,9 @@ import {
   Technician, VehicleRecord, TechnicianSalary,
 } from '../models/models';
 
-function resolveBase(): string {
-  const h = window.location.hostname;
-  if (h === 'localhost' || h === '127.0.0.1') {
-    return 'http://localhost:8080';
-  }
-  // When accessed via Cloudflare tunnel or sevis.store, the gateway is
-  // exposed on the same host at port 8080 via a second tunnel.
-  // Override by setting SEVIS_API_URL in the page if needed.
-  const override = (window as any).__SEVIS_API_URL__;
-  if (override) return override;
-  return `${window.location.protocol}//${h}:8080`;
-}
-
-const BASE = resolveBase();
+const BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8080'
+  : 'https://api.sevis.store';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
