@@ -80,6 +80,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [".trycloudflare.com", "sevis.store", ".sevis.store"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "sevis-web:build:production"

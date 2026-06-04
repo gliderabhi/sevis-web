@@ -8,7 +8,7 @@ import {
   Technician, VehicleRecord, TechnicianSalary,
 } from '../models/models';
 
-const BASE = 'http://32.194.147.195:8080';
+const BASE = 'http://localhost:8080';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
