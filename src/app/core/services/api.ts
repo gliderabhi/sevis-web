@@ -8,9 +8,7 @@ import {
   Technician, VehicleRecord, TechnicianSalary,
 } from '../models/models';
 
-const BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:8080'
-  : 'https://api.sevis.store';
+const BASE = 'https://api.sevis.store';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
