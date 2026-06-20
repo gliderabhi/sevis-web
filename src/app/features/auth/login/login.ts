@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api';
 import { AuthService } from '../../../core/services/auth';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -14,6 +15,14 @@ export class LoginComponent {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private router = inject(Router);
+
+  constructor() {
+    inject(SeoService).setPage({
+      title: 'Log In',
+      description: 'Sign in to Sevis to manage your auto workshop — job cards, inventory, billing, and technicians.',
+      url: 'https://auto.sevis.store/login',
+    });
+  }
 
   email = 'admin@sevis.com';
   password = 'Admin@1234';

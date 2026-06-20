@@ -3,13 +3,14 @@ import { authGuard } from './core/guards/auth-guard';
 import { rolesGuard } from './core/guards/roles-guard';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', loadComponent: () => import('./features/landing/landing').then(m => m.LandingComponent) },
   { path: 'login', loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent) },
+  { path: 'signup', loadComponent: () => import('./features/auth/signup/signup').then(m => m.SignupComponent) },
   {
     path: '',
     loadComponent: () => import('./features/shell/shell').then(m => m.ShellComponent),
     canActivate: [authGuard],
     children: [
-      { path: '',           redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'unauthorized', loadComponent: () => import('./features/unauthorized/unauthorized').then(m => m.UnauthorizedComponent) },
 
       // Both roles

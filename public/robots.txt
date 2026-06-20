@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+Disallow: /dashboard
+Disallow: /job-cards
+Disallow: /parts
+Disallow: /inventory
+Disallow: /billing
+Disallow: /reports
+Disallow: /users
+Disallow: /technicians
+Disallow: /vehicles
+Disallow: /unauthorized
+Sitemap: https://auto.sevis.store/sitemap.xml
