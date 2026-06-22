@@ -227,6 +227,7 @@
               <th>Description</th>
               <th>Type</th>
               <th>Technician</th>
+              <th>Status</th>
               <th class="text-right">Qty</th>
               <th class="text-right">Rate</th>
               <th class="text-right">Amount</th>
@@ -239,6 +240,25 @@
                 <td class="font-medium">{{ l.description }}</td>
                 <td><span class="jcd-type-badge">{{ l.type }}</span></td>
                 <td class="text-muted">{{ l.technicianName ?? '—' }}</td>
+                <td>
+                  @if (l.technicianId) {
+                    <button class="jcd-task-status-btn"
+                            [class.jcd-task-status-btn--done]="l.taskStatus === 'DONE'"
+                            [class.jcd-task-status-btn--pending]="l.taskStatus !== 'DONE'"
+                            [disabled]="isClosed()"
+                            (click)="toggleTaskStatus(l.id, l.taskStatus)"
+                            [title]="l.taskStatus === 'DONE' ? 'Mark as Pending' : 'Mark as Done'">
+                      @if (l.taskStatus === 'DONE') {
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Done
+                      } @else {
+                        Pending
+                      }
+                    </button>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
                 <td class="text-right">{{ l.quantity }}</td>
                 <td class="text-right text-muted">{{ fmt(l.rate) }}</td>
                 <td class="text-right font-bold">{{ fmt(l.amount) }}</td>
@@ -253,7 +273,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" class="jcd-empty">No labour items added yet</td></tr>
+              <tr><td colspan="8" class="jcd-empty">No labour items added yet</td></tr>
             }
           </tbody>
         </table>

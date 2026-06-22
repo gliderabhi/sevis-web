@@ -3,7 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api';
 import { Technician, TechnicianSalary } from '../../core/models/models';
 
-const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', panNumber: '', aadhaarNumber: '' });
+const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', panNumber: '', aadhaarNumber: '', userId: null });
+const BLANK_LOGIN = () => ({ email: '', password: '' });
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -28,6 +29,7 @@ export class TechniciansComponent implements OnInit {
   formError = signal('');
   editingId = signal<number | null>(null);
   form = signal<Partial<Technician>>(BLANK());
+  loginForm = signal(BLANK_LOGIN());
 
   specialisations = ['MECHANICAL', 'ELECTRICAL', 'BODYWORK', 'AC', 'GENERAL'];
   months = MONTHS;
@@ -64,13 +66,14 @@ export class TechniciansComponent implements OnInit {
   openAdd(): void {
     this.editingId.set(null);
     this.form.set(BLANK());
+    this.loginForm.set(BLANK_LOGIN());
     this.formError.set('');
     this.showForm.set(true);
   }
 
   openEdit(t: Technician): void {
     this.editingId.set(t.id);
-    this.form.set({ name: t.name, phone: t.phone, specialisation: t.specialisation, employeeCode: t.employeeCode, panNumber: t.panNumber, aadhaarNumber: t.aadhaarNumber });
+    this.form.set({ name: t.name, phone: t.phone, specialisation: t.specialisation, employeeCode: t.employeeCode, panNumber: t.panNumber, aadhaarNumber: t.aadhaarNumber, userId: t.userId ?? null });
     this.formError.set('');
     this.showForm.set(true);
   }
@@ -79,14 +82,38 @@ export class TechniciansComponent implements OnInit {
 
   save(): void {
     const f = this.form();
+    const lf = this.loginForm();
+    const id = this.editingId();
+
     if (!f.name?.trim()) { this.formError.set('Name is required.'); return; }
+
+    if (!id) {
+      if (!lf.email?.trim()) { this.formError.set('Login email is required.'); return; }
+      if (!lf.password || lf.password.length < 8) { this.formError.set('Password must be at least 8 characters.'); return; }
+      if (!/[A-Z]/.test(lf.password)) { this.formError.set('Password must contain at least one uppercase letter.'); return; }
+      if (!/[0-9]/.test(lf.password)) { this.formError.set('Password must contain at least one digit.'); return; }
+    }
+
     this.saving.set(true);
     this.formError.set('');
-    const id = this.editingId();
-    const req$ = id ? this.api.updateTechnician(id, f) : this.api.createTechnician(f);
-    req$.subscribe({
-      next: () => { this.saving.set(false); this.closeForm(); this.load(); },
-      error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to save.'); this.saving.set(false); },
+
+    if (id) {
+      this.api.updateTechnician(id, f).subscribe({
+        next: () => { this.saving.set(false); this.closeForm(); this.load(); },
+        error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to save.'); this.saving.set(false); },
+      });
+      return;
+    }
+
+    // New technician: create login first, then create technician with userId
+    this.api.registerTechnician({ name: f.name!.trim(), email: lf.email.trim(), password: lf.password, phone: f.phone }).subscribe({
+      next: (res) => {
+        this.api.createTechnician({ ...f, userId: res.userId }).subscribe({
+          next: () => { this.saving.set(false); this.closeForm(); this.load(); },
+          error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to create technician.'); this.saving.set(false); },
+        });
+      },
+      error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to create login account.'); this.saving.set(false); },
     });
   }
 

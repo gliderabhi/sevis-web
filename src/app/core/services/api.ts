@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
@@ -8,11 +8,11 @@ import {
   Technician, VehicleRecord, TechnicianSalary,
 } from '../models/models';
 
-const BASE = 'https://api.sevis.store';
+const BASE = '';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private http = inject(HttpClient);
+  constructor(private http: HttpClient) {}
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   login(body: LoginRequest): Observable<AuthResponse> {
@@ -20,6 +20,17 @@ export class ApiService {
   }
   logout(): Observable<void> {
     return this.http.post<void>(`${BASE}/user-service/api/auth/logout`, {});
+  }
+  registerDealer(body: Record<string, unknown>): Observable<{ message: string; userId: number }> {
+    return this.http.post<{ message: string; userId: number }>(`${BASE}/user-service/api/auth/signup`, body);
+  }
+  registerTechnician(body: { name: string; email: string; password: string; phone?: string }): Observable<{ message: string; userId: number }> {
+    const payload: Record<string, unknown> = { name: body.name, email: body.email, password: body.password, role: 'TECHNICIAN', accountType: 'INDIVIDUAL' };
+    if (body.phone?.trim()) payload['phone'] = body.phone.trim();
+    return this.http.post<{ message: string; userId: number }>(`${BASE}/user-service/api/auth/signup`, payload);
+  }
+  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${BASE}/user-service/api/auth/change-password`, { currentPassword, newPassword });
   }
 
   // ── Audit / Dashboard ────────────────────────────────────────────────────
@@ -63,6 +74,12 @@ export class ApiService {
   }
   deleteLabour(id: number, labourId: number): Observable<JobCardDetail> {
     return this.http.delete<JobCardDetail>(`${BASE}/orders-service/api/job-cards/${id}/labour/${labourId}`);
+  }
+  updateLabourStatus(id: number, labourId: number, taskStatus: string): Observable<JobCardDetail> {
+    return this.http.patch<JobCardDetail>(
+      `${BASE}/orders-service/api/job-cards/${id}/labour/${labourId}/status`, {},
+      { params: new HttpParams().set('taskStatus', taskStatus) }
+    );
   }
   addPart(id: number, body: object): Observable<JobCardDetail> {
     return this.http.post<JobCardDetail>(`${BASE}/orders-service/api/job-cards/${id}/parts`, body);

@@ -722,3 +722,29 @@
 .jcd-invoice-val   { font-weight: 600; color: #1e293b; }
 .jcd-invoice-total { color: #16a34a; font-size: 15px; }
 .jcd-mono          { font-family: monospace; }
+
+/* Task status toggle button in labour table */
+.jcd-task-status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.jcd-task-status-btn:disabled { cursor: default; opacity: 0.7; }
+.jcd-task-status-btn--done {
+  background: #dcfce7;
+  color: #166534;
+}
+.jcd-task-status-btn--done:not(:disabled):hover { background: #bbf7d0; }
+.jcd-task-status-btn--pending {
+  background: #fef9c3;
+  color: #854d0e;
+}
+.jcd-task-status-btn--pending:not(:disabled):hover { background: #fef08a; }

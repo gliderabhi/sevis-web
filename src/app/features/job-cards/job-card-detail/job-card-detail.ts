@@ -172,6 +172,15 @@ export class JobCardDetailComponent implements OnInit {
     });
   }
 
+  toggleTaskStatus(labourId: number, currentStatus: string) {
+    const jc = this.card();
+    if (!jc) return;
+    const next = currentStatus === 'DONE' ? 'PENDING' : 'DONE';
+    this.api.updateLabourStatus(jc.id, labourId, next).subscribe({
+      next: (updatedJc: JCDetail) => this.card.set(updatedJc)
+    });
+  }
+
   onCataloguePartSelected(part: Part): void {
     this.partForm.partNumber = part.partNumber;
     this.partForm.description = part.description;
