@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth-guard';
+import { authGuard, loggedInGuard } from './core/guards/auth-guard';
 import { rolesGuard } from './core/guards/roles-guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', loadComponent: () => import('./features/landing/landing').then(m => m.LandingComponent) },
-  { path: 'login', loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent) },
+  { path: 'login', canActivate: [loggedInGuard], loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent) },
   { path: 'signup', loadComponent: () => import('./features/auth/signup/signup').then(m => m.SignupComponent) },
   {
     path: '',

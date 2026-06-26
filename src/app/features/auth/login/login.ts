@@ -41,7 +41,7 @@ export class LoginComponent {
           email: this.email,
           role: res.role,
         });
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.error.set(err?.error?.message ?? 'Invalid credentials. Please try again.');
