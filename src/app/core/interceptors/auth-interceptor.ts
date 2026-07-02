@@ -13,7 +13,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(cloned).pipe(
     catchError(err => {
-      if (err.status === 401) auth.clearSession();
+      if (err.status === 401 && !req.url.includes('/api/auth/')) auth.clearSession();
       return throwError(() => err);
     })
   );
