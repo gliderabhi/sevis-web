@@ -101,6 +101,9 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   logout() {
     this.accountMenuOpen.set(false);
-    this.api.logout().subscribe({ complete: () => this.auth.clearSession() });
+    this.api.logout().subscribe({
+      complete: () => this.auth.clearSession(),
+      error: () => this.auth.clearSession(),
+    });
   }
 }

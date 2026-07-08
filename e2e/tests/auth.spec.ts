@@ -28,7 +28,7 @@ test.describe('Authentication', () => {
     const loginPage = new LoginPage(page);
     await loginPage.login(ADMIN);
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByText('Dashboard')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   });
 
   test('DEALER can log in and reach dashboard', async ({ page }) => {
