@@ -76,15 +76,15 @@
                  (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="font-size:12px;font-weight:600;color:#374151;">Make</label>
-          <input type="text" name="make" [(ngModel)]="form.vehicle.make" placeholder="e.g. Tata Motors"
+          <label style="font-size:12px;font-weight:600;color:#374151;">Make <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="make" [(ngModel)]="form.vehicle.make" required placeholder="e.g. Tata Motors"
                  style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
                  (focus)="$any($event.target).style.borderColor='#2563eb'"
                  (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="font-size:12px;font-weight:600;color:#374151;">Model</label>
-          <input type="text" name="model" [(ngModel)]="form.vehicle.model" placeholder="e.g. Prima"
+          <label style="font-size:12px;font-weight:600;color:#374151;">Model <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="model" [(ngModel)]="form.vehicle.model" required placeholder="e.g. Prima"
                  style="padding:10px 13px;font-size:13px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
                  (focus)="$any($event.target).style.borderColor='#2563eb'"
                  (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>

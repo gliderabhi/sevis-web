@@ -32,9 +32,8 @@ export class ShellPage {
   }
 
   async openAccountMenu() {
-    // The account footer button toggles the menu
-    const footer = this.page.locator('div[style*="border-top:1px solid rgba(255,255,255,0.08)"]');
-    await footer.locator('button').first().click();
+    // The account footer button shows the user's role (e.g. "Test Admin ADMIN")
+    await this.page.getByRole('button', { name: /ADMIN|DEALER|TECHNICIAN/ }).click();
   }
 
   async logout() {

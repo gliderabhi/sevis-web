@@ -20,7 +20,7 @@ export class JobCardListPage {
   }
 
   get rowCount() {
-    return this.page.locator('div[style*="Showing"]');
+    return this.page.getByText(/Showing \d+ of \d+ records/);
   }
 
   get loadingIndicator() {

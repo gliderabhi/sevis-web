@@ -16,13 +16,13 @@ test.describe('Job Cards — list', () => {
     await list.goto();
     // Status filter pills should be present
     await expect(page.getByRole('button', { name: 'All' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Open' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'RECEIVED' })).toBeVisible();
   });
 
   test('can filter job cards by status', async ({ page }) => {
     const list = new JobCardListPage(page);
     await list.goto();
-    await list.filterByStatus('Open');
+    await list.filterByStatus('RECEIVED');
     // Status pills are always shown; filtered count may change
     await expect(list.rowCount).toBeVisible();
   });
@@ -58,7 +58,7 @@ test.describe('Job Cards — create', () => {
     await list.goto();
     await list.newJobCardButton.click();
     await expect(page).toHaveURL(/\/job-cards\/new/);
-    await expect(page.getByText('New Job Card')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'New Job Card', level: 2 })).toBeVisible();
   });
 
   test('create form requires mandatory fields', async ({ page }) => {
@@ -103,19 +103,21 @@ test.describe('Job Cards — status flow', () => {
       customerPhone: '9000000001',
       customerName: 'Status Flow Test',
       vehicleRegNumber: `FLOW${Date.now().toString().slice(-6)}`,
+      vehicleMake: 'Tata',
+      vehicleModel: 'Nexon',
     });
     await create.submit();
     jobCardUrl = page.url();
   });
 
-  test('new job card starts in OPEN status', async ({ page }) => {
+  test('new job card starts in RECEIVED status', async ({ page }) => {
     await page.goto(jobCardUrl);
-    // The timeline's first step (Open) should be marked as current/done
-    const openStep = page.locator('.jcd-timeline-label', { hasText: 'Open' });
-    await expect(openStep).toBeVisible();
+    // The timeline's first step (Received) should be marked as current/done
+    const receivedStep = page.locator('.jcd-timeline-label', { hasText: 'RECEIVED' });
+    await expect(receivedStep).toBeVisible();
   });
 
-  test('can advance status from OPEN to IN_PROGRESS', async ({ page }) => {
+  test('can advance status from RECEIVED to IN_PROGRESS', async ({ page }) => {
     await page.goto(jobCardUrl);
     const detail = new JobCardDetailPage(page);
     await detail.changeStatus('IN_PROGRESS');
@@ -124,7 +126,7 @@ test.describe('Job Cards — status flow', () => {
     await expect(badge).toContainText(/in.progress/i);
   });
 
-  test('full status flow: OPEN → IN_PROGRESS → READY → DELIVERED', async ({ page }) => {
+  test('full status flow: RECEIVED → IN_PROGRESS → READY → DELIVERED', async ({ page }) => {
     await page.goto(jobCardUrl);
     const detail = new JobCardDetailPage(page);
 
@@ -138,7 +140,7 @@ test.describe('Job Cards — status flow', () => {
     await expect(page.locator('app-status-badge').first()).toContainText(/delivered/i);
   });
 
-  test('CLOSED job card shows read-only badge and hides action buttons', async ({ page }) => {
+  test('CLOSED job card shows read-only badge and disables action buttons', async ({ page }) => {
     // Advance all the way to CLOSED (no pending labour so no block)
     await page.goto(jobCardUrl);
     const detail = new JobCardDetailPage(page);
@@ -148,7 +150,7 @@ test.describe('Job Cards — status flow', () => {
     await detail.changeStatus('CLOSED');
 
     await expect(detail.closedBadge).toBeVisible();
-    await expect(detail.addLabourButton).not.toBeVisible();
-    await expect(detail.addPartButton).not.toBeVisible();
+    await expect(detail.addLabourButton).toBeDisabled();
+    await expect(detail.addPartButton).toBeDisabled();
   });
 });

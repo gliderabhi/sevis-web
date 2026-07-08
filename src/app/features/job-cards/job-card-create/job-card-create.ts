@@ -46,8 +46,14 @@ export class JobCardCreateComponent {
   }
 
   onSubmit(): void {
-    if (!this.form.customer.phone || !this.form.customer.name || !this.form.vehicle.regNumber) {
-      this.error.set('Customer phone, name and vehicle registration are required.');
+    if (
+      !this.form.customer.phone ||
+      !this.form.customer.name ||
+      !this.form.vehicle.regNumber ||
+      !this.form.vehicle.make ||
+      !this.form.vehicle.model
+    ) {
+      this.error.set('Customer phone, name, vehicle registration, make and model are required.');
       return;
     }
 

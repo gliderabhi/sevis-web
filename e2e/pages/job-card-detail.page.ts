@@ -17,11 +17,12 @@ export class JobCardDetailPage {
   }
 
   get addLabourButton() {
-    return this.page.getByRole('button', { name: 'Add Labour' });
+    // Scoped to the section-level button — the top action bar has a same-named shortcut
+    return this.page.locator('button.jcd-add-btn--blue');
   }
 
   get addPartButton() {
-    return this.page.getByRole('button', { name: 'Add Part' });
+    return this.page.locator('button.jcd-add-btn--green');
   }
 
   get closedBadge() {
