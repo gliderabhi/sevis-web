@@ -23,7 +23,6 @@ export class JobCardCreateComponent {
     'INSPECTION',
     'ACCIDENTAL',
     'WARRANTY',
-    'OTHER',
   ];
 
   fuelTypes = ['PETROL', 'DIESEL', 'CNG', 'ELECTRIC', 'HYBRID'];
@@ -35,7 +34,7 @@ export class JobCardCreateComponent {
       regNumber: '', make: '', model: '', variant: '',
       year: null as number | null, fuelType: '', color: '', chassisNo: '',
     },
-    serviceType: 'GENERAL_SERVICE',
+    serviceType: 'PERIODIC_SERVICE',
     kmIn: null as number | null,
     advisorName: '',
     expectedDelivery: '',
