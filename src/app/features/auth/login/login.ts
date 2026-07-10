@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api';
 import { AuthService } from '../../../core/services/auth';
 import { SeoService } from '../../../core/services/seo.service';
+import { PendingGoogleAuthService } from '../../../core/services/pending-google-auth';
 
 declare const google: any;
 
@@ -18,6 +19,7 @@ export class LoginComponent implements AfterViewInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private zone = inject(NgZone);
+  private pendingGoogleAuth = inject(PendingGoogleAuthService);
 
   constructor() {
     inject(SeoService).setPage({
@@ -62,6 +64,16 @@ export class LoginComponent implements AfterViewInit {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
+        if (err?.status === 404 || err?.status === 403) {
+          // 404 = brand-new identity, 403 = identity exists (e.g. from
+          // another app) but has no SEVIS_AUTO role yet — either way, hand
+          // the verified idToken to the signup page, prefilled with
+          // whatever Google gave us, instead of failing outright.
+          const { name, email } = PendingGoogleAuthService.decode(idToken);
+          this.pendingGoogleAuth.set({ idToken, name, email });
+          this.router.navigate(['/signup']);
+          return;
+        }
         this.error.set(err?.error?.message ?? 'Google sign-in failed. Please try again.');
         this.loading.set(false);
       },

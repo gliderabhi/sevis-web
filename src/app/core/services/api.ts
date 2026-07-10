@@ -21,6 +21,9 @@ export class ApiService {
   loginWithGoogle(idToken: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${BASE}/user-service/api/auth/google`, { idToken });
   }
+  completeGoogleSignup(body: Record<string, unknown>): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${BASE}/user-service/api/auth/google/complete`, body);
+  }
   logout(): Observable<void> {
     return this.http.post<void>(`${BASE}/user-service/api/auth/logout`, {});
   }

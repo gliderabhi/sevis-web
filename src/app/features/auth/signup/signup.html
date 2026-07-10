@@ -19,7 +19,9 @@
 
       <div style="margin-bottom:28px;">
         <h2 style="margin:0 0 6px 0;font-size:26px;font-weight:700;color:#1e293b;">Dealer Registration</h2>
-        <p style="margin:0;font-size:13px;color:#64748b;">Create your dealership account</p>
+        <p style="margin:0;font-size:13px;color:#64748b;">
+          {{ googleIdToken() ? "You're signed in with Google — just a few more details" : 'Create your dealership account' }}
+        </p>
       </div>
 
       <form (ngSubmit)="onSubmit()" #signupForm="ngForm" style="display:flex;flex-direction:column;gap:18px;">
@@ -83,6 +85,7 @@
             name="email"
             [(ngModel)]="email"
             required
+            [readOnly]="!!googleIdToken()"
             placeholder="dealer@example.com"
             [style]="inputStyle"
             (focus)="onFocus($event)"
@@ -105,35 +108,37 @@
           />
         </div>
 
-        <!-- Password + Confirm -->
-        <div style="display:flex;gap:12px;">
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
-            <label style="font-size:13px;font-weight:600;color:#374151;">Password *</label>
-            <input
-              type="password"
-              name="password"
-              [(ngModel)]="password"
-              required
-              placeholder="••••••••"
-              [style]="inputStyle"
-              (focus)="onFocus($event)"
-              (blur)="onBlur($event)"
-            />
+        <!-- Password + Confirm (skipped when continuing a Google sign-in — already authenticated) -->
+        @if (!googleIdToken()) {
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:13px;font-weight:600;color:#374151;">Password *</label>
+              <input
+                type="password"
+                name="password"
+                [(ngModel)]="password"
+                required
+                placeholder="••••••••"
+                [style]="inputStyle"
+                (focus)="onFocus($event)"
+                (blur)="onBlur($event)"
+              />
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:13px;font-weight:600;color:#374151;">Confirm *</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                [(ngModel)]="confirmPassword"
+                required
+                placeholder="••••••••"
+                [style]="inputStyle"
+                (focus)="onFocus($event)"
+                (blur)="onBlur($event)"
+              />
+            </div>
           </div>
-          <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
-            <label style="font-size:13px;font-weight:600;color:#374151;">Confirm *</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              [(ngModel)]="confirmPassword"
-              required
-              placeholder="••••••••"
-              [style]="inputStyle"
-              (focus)="onFocus($event)"
-              (blur)="onBlur($event)"
-            />
-          </div>
-        </div>
+        }
 
         <!-- GST + Dealer Code -->
         <div style="display:flex;gap:12px;">
