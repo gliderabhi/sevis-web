@@ -4,18 +4,30 @@
   <div class="page-header">
     <div>
       <h2 style="margin:0;font-size:20px;font-weight:700;color:#1e293b;">Inventory</h2>
-      <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Manage parts and stock</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Manage parts, ancillary items and stock</p>
     </div>
-    <button
-      (click)="openAdd()"
-      style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
-      (mouseenter)="$any($event.target).style.background='#1d4ed8'"
-      (mouseleave)="$any($event.target).style.background='#2563eb'">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-      </svg>
-      Add Item
-    </button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button
+        (click)="openAdd('ANCILLARY')"
+        style="display:flex;align-items:center;gap:7px;padding:9px 16px;background:#fef3c7;color:#b45309;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
+        (mouseenter)="$any($event.target).style.background='#fde68a'"
+        (mouseleave)="$any($event.target).style.background='#fef3c7'">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Ancillary Item
+      </button>
+      <button
+        (click)="openAdd('PART')"
+        style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"
+        (mouseenter)="$any($event.target).style.background='#1d4ed8'"
+        (mouseleave)="$any($event.target).style.background='#2563eb'">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Part
+      </button>
+    </div>
   </div>
 
   <!-- Stats -->
@@ -59,6 +71,49 @@
 
   </div>
 
+  <!-- Category Filter Tabs -->
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button
+      type="button"
+      (click)="selectedCategoryFilter.set('ALL')"
+      [style.background]="selectedCategoryFilter() === 'ALL' ? '#1e293b' : '#f1f5f9'"
+      [style.color]="selectedCategoryFilter() === 'ALL' ? '#fff' : '#64748b'"
+      style="padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;">
+      All Items
+      <span style="font-size:11px;padding:1px 6px;border-radius:10px;"
+            [style.background]="selectedCategoryFilter() === 'ALL' ? 'rgba(255,255,255,0.2)' : '#e2e8f0'"
+            [style.color]="selectedCategoryFilter() === 'ALL' ? '#fff' : '#475569'">
+        {{ items().length }}
+      </span>
+    </button>
+    <button
+      type="button"
+      (click)="selectedCategoryFilter.set('PART')"
+      [style.background]="selectedCategoryFilter() === 'PART' ? '#2563eb' : '#f1f5f9'"
+      [style.color]="selectedCategoryFilter() === 'PART' ? '#fff' : '#64748b'"
+      style="padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;">
+      📦 Parts
+      <span style="font-size:11px;padding:1px 6px;border-radius:10px;"
+            [style.background]="selectedCategoryFilter() === 'PART' ? 'rgba(255,255,255,0.25)' : '#eff6ff'"
+            [style.color]="selectedCategoryFilter() === 'PART' ? '#fff' : '#2563eb'">
+        {{ partCount() }}
+      </span>
+    </button>
+    <button
+      type="button"
+      (click)="selectedCategoryFilter.set('ANCILLARY')"
+      [style.background]="selectedCategoryFilter() === 'ANCILLARY' ? '#d97706' : '#f1f5f9'"
+      [style.color]="selectedCategoryFilter() === 'ANCILLARY' ? '#fff' : '#64748b'"
+      style="padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;">
+      🏷️ Ancillary Items
+      <span style="font-size:11px;padding:1px 6px;border-radius:10px;"
+            [style.background]="selectedCategoryFilter() === 'ANCILLARY' ? 'rgba(255,255,255,0.25)' : '#fef3c7'"
+            [style.color]="selectedCategoryFilter() === 'ANCILLARY' ? '#fff' : '#b45309'">
+        {{ ancillaryCount() }}
+      </span>
+    </button>
+  </div>
+
   <!-- Table -->
   <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;">
 
@@ -76,6 +131,7 @@
             <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">SKU</th>
               <th style="padding:12px 20px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Name</th>
+              <th style="padding:12px 20px;text-align:center;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Category</th>
               <th style="padding:12px 20px;text-align:center;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Status</th>
               <th style="padding:12px 20px;text-align:right;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Quantity</th>
               <th style="padding:12px 20px;text-align:right;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Unit Price</th>
@@ -84,7 +140,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (item of items(); track item.id) {
+            @for (item of filteredItems(); track item.id) {
               <tr style="border-bottom:1px solid #f1f5f9;transition:background 0.1s;"
                   (mouseenter)="$any($event.target).closest('tr').style.background='#f8fafc'"
                   (mouseleave)="$any($event.target).closest('tr').style.background=''">
@@ -95,6 +151,18 @@
 
                 <td style="padding:14px 20px;">
                   <span style="font-size:14px;font-weight:600;color:#1e293b;">{{ item.name }}</span>
+                </td>
+
+                <td style="padding:14px 20px;text-align:center;">
+                  @if ((item.category || '').toUpperCase() === 'ANCILLARY') {
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#fef3c7;color:#b45309;border-radius:20px;font-size:11px;font-weight:700;">
+                      🏷️ Ancillary
+                    </span>
+                  } @else {
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#eff6ff;color:#2563eb;border-radius:20px;font-size:11px;font-weight:700;">
+                      📦 Part
+                    </span>
+                  }
                 </td>
 
                 <td style="padding:14px 20px;text-align:center;">
@@ -144,8 +212,8 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" style="padding:48px 20px;text-align:center;color:#94a3b8;font-size:14px;">
-                  No inventory items found. Click "Add Item" to get started.
+                <td colspan="8" style="padding:48px 20px;text-align:center;color:#94a3b8;font-size:14px;">
+                  No items found in this view. Click "Add Ancillary Item" or "Add Part" to get started.
                 </td>
               </tr>
             }
@@ -165,14 +233,18 @@
     (click)="closeForm()">
 
     <div
-      style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);width:100%;max-width:440px;overflow:hidden;"
+      style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);width:100%;max-width:460px;overflow:hidden;"
       (click)="$event.stopPropagation()">
 
       <!-- Modal header -->
       <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
         <div>
-          <h3 style="margin:0;font-size:16px;font-weight:700;color:#1e293b;">{{ selectedItem() ? 'Edit Item' : 'Add New Item' }}</h3>
-          <p style="margin:3px 0 0;font-size:12px;color:#94a3b8;">{{ selectedItem() ? 'Update stock details' : 'Fill in the part details' }}</p>
+          <h3 style="margin:0;font-size:16px;font-weight:700;color:#1e293b;">
+            {{ selectedItem() ? 'Edit Item' : (form.category === 'ANCILLARY' ? 'Add Ancillary Item' : 'Add New Part') }}
+          </h3>
+          <p style="margin:3px 0 0;font-size:12px;color:#94a3b8;">
+            {{ selectedItem() ? 'Update inventory details' : (form.category === 'ANCILLARY' ? 'Add an ancillary service or item to stock' : 'Select a part from catalogue') }}
+          </p>
         </div>
         <button (click)="closeForm()"
                 style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;border:none;border-radius:8px;cursor:pointer;color:#64748b;"
@@ -194,33 +266,81 @@
         }
 
         @if (!selectedItem()) {
-          <!-- New item: use part picker from catalogue -->
+          <!-- Item Type Selector Tabs -->
           <div style="display:flex;flex-direction:column;gap:6px;">
-            <label style="font-size:12px;font-weight:600;color:#374151;">
-              Part from Catalogue <span style="color:#ef4444;">*</span>
-            </label>
-            <app-part-picker (partSelected)="onPartSelected($event)" (cleared)="onPartCleared()"/>
+            <label style="font-size:12px;font-weight:600;color:#374151;">Item Type <span style="color:#ef4444;">*</span></label>
+            <div style="display:flex;background:#f1f5f9;border-radius:10px;padding:3px;gap:4px;">
+              <button type="button" (click)="setCategory('PART')"
+                [style.background]="form.category === 'PART' ? '#fff' : 'transparent'"
+                [style.color]="form.category === 'PART' ? '#2563eb' : '#64748b'"
+                [style.boxShadow]="form.category === 'PART' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'"
+                style="flex:1;padding:8px 12px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;">
+                📦 Part (Catalogue)
+              </button>
+              <button type="button" (click)="setCategory('ANCILLARY')"
+                [style.background]="form.category === 'ANCILLARY' ? '#fff' : 'transparent'"
+                [style.color]="form.category === 'ANCILLARY' ? '#b45309' : '#64748b'"
+                [style.boxShadow]="form.category === 'ANCILLARY' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'"
+                style="flex:1;padding:8px 12px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;">
+                🏷️ Ancillary Item
+              </button>
+            </div>
           </div>
 
-          <!-- Fallback editable fields (pre-filled by picker, still editable) -->
-          @if (form.name || form.sku) {
+          @if (form.category === 'ANCILLARY') {
+            <!-- Ancillary Item Form -->
             <div style="display:flex;flex-direction:column;gap:6px;">
-              <label style="font-size:12px;font-weight:600;color:#374151;">Item Name</label>
-              <input type="text" [(ngModel)]="form.name"
+              <label style="font-size:12px;font-weight:600;color:#374151;">Item / Service Name <span style="color:#ef4444;">*</span></label>
+              <input type="text" [(ngModel)]="form.name" placeholder="e.g. Environmental Fee, Towing, Vehicle Sanitization"
                      style="padding:10px 13px;font-size:14px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
-                     (focus)="$any($event.target).style.borderColor='#2563eb'"
+                     (focus)="$any($event.target).style.borderColor='#d97706'"
                      (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;">
-              <label style="font-size:12px;font-weight:600;color:#374151;">SKU / Part Number</label>
-              <input type="text" [(ngModel)]="form.sku"
+              <label style="font-size:12px;font-weight:600;color:#374151;">SKU / Code <span style="color:#ef4444;">*</span></label>
+              <input type="text" [(ngModel)]="form.sku" placeholder="e.g. ANC-1001"
                      style="padding:10px 13px;font-size:14px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;font-family:monospace;"
-                     (focus)="$any($event.target).style.borderColor='#2563eb'"
+                     (focus)="$any($event.target).style.borderColor='#d97706'"
                      (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
             </div>
+          } @else {
+            <!-- Part Form: Catalogue Picker -->
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:12px;font-weight:600;color:#374151;">
+                Part from Catalogue <span style="color:#ef4444;">*</span>
+              </label>
+              <app-part-picker (partSelected)="onPartSelected($event)" (cleared)="onPartCleared()"/>
+            </div>
+
+            @if (form.name || form.sku) {
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="font-size:12px;font-weight:600;color:#374151;">Item Name</label>
+                <input type="text" [(ngModel)]="form.name"
+                       style="padding:10px 13px;font-size:14px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;"
+                       (focus)="$any($event.target).style.borderColor='#2563eb'"
+                       (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="font-size:12px;font-weight:600;color:#374151;">SKU / Part Number</label>
+                <input type="text" [(ngModel)]="form.sku"
+                       style="padding:10px 13px;font-size:14px;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;color:#1e293b;background:#f8fafc;font-family:monospace;"
+                       (focus)="$any($event.target).style.borderColor='#2563eb'"
+                       (blur)="$any($event.target).style.borderColor='#e2e8f0'"/>
+              </div>
+            }
           }
         } @else {
-          <!-- Edit mode: show plain editable fields -->
+          <!-- Edit mode -->
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:12px;font-weight:600;color:#374151;">Category</label>
+            <div style="display:inline-block;">
+              <span [style.background]="form.category === 'ANCILLARY' ? '#fef3c7' : '#eff6ff'"
+                    [style.color]="form.category === 'ANCILLARY' ? '#b45309' : '#2563eb'"
+                    style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
+                {{ form.category === 'ANCILLARY' ? '🏷️ Ancillary Item' : '📦 Part' }}
+              </span>
+            </div>
+          </div>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:12px;font-weight:600;color:#374151;">Item Name <span style="color:#ef4444;">*</span></label>
             <input type="text" [(ngModel)]="form.name" placeholder="e.g. Engine Oil Filter"
@@ -265,10 +385,9 @@
           Cancel
         </button>
         <button (click)="saveItem()" [disabled]="saving()"
-                style="padding:9px 20px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;"
-                [style.opacity]="saving() ? '0.7' : '1'"
-                (mouseenter)="$any($event.target).style.background='#1d4ed8'"
-                (mouseleave)="$any($event.target).style.background='#2563eb'">
+                [style.background]="form.category === 'ANCILLARY' ? '#d97706' : '#2563eb'"
+                style="padding:9px 20px;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;"
+                [style.opacity]="saving() ? '0.7' : '1'">
           @if (saving()) {
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;pointer-events:none;">
               <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="4"/>
@@ -276,7 +395,7 @@
             </svg>
             Saving…
           } @else {
-            {{ selectedItem() ? 'Save Changes' : 'Add Item' }}
+            {{ selectedItem() ? 'Save Changes' : (form.category === 'ANCILLARY' ? 'Add Ancillary Item' : 'Add Part') }}
           }
         </button>
       </div>

@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 @Component({
   selector: 'app-job-card-create',
@@ -89,7 +90,7 @@ export class JobCardCreateComponent {
         this.router.navigate(['/job-cards', jc.id]);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'Failed to create job card.');
+        this.error.set(apiErrorMessage(err, 'Failed to create job card.'));
         this.loading.set(false);
       },
     });

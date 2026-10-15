@@ -43,6 +43,12 @@ export class PartsCatalogueComponent implements OnInit, OnDestroy {
     return this.parts().filter(p => p.productGroup === group);
   });
 
+  // Group filtering only narrows the page(s) already loaded (there's no server-side
+  // "filter by group" call), so the header should reflect that filtered count while a
+  // group is selected instead of always showing the full catalogue total — otherwise it
+  // reads as if the filter never took effect.
+  headerCount = computed(() => this.selectedGroup() ? this.filteredParts().length : this.totalElements());
+
   ngOnInit(): void {
     this.loadPage(0);
 

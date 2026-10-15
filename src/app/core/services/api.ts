@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   LoginRequest, AuthResponse, AuditSummary,
   JobCardSummary, JobCardDetail, CreateJobCardRequest,
-  InventoryItem, InvoiceDetail, AppUser, Part, PagedResponse, StockItem,
+  InventoryItem, InvoiceDetail, AppUser, Part, PagedResponse,
   Technician, VehicleRecord, TechnicianSalary,
+  AttendanceRecord, LeaveRequest, LeaveType, LeaveStatus, AttendanceStatus,
 } from '../models/models';
 
 const BASE = '';
@@ -30,8 +32,8 @@ export class ApiService {
   registerDealer(body: Record<string, unknown>): Observable<{ message: string; userId: number }> {
     return this.http.post<{ message: string; userId: number }>(`${BASE}/user-service/api/auth/signup`, body);
   }
-  registerTechnician(body: { name: string; email: string; password: string; phone?: string }): Observable<{ message: string; userId: number }> {
-    const payload: Record<string, unknown> = { name: body.name, email: body.email, password: body.password, role: 'TECHNICIAN', accountType: 'INDIVIDUAL' };
+  registerTechnician(body: { name: string; email: string; password: string; phone?: string; role?: string }): Observable<{ message: string; userId: number }> {
+    const payload: Record<string, unknown> = { name: body.name, email: body.email, password: body.password, role: body.role ?? 'TECHNICIAN', accountType: 'INDIVIDUAL' };
     if (body.phone?.trim()) payload['phone'] = body.phone.trim();
     return this.http.post<{ message: string; userId: number }>(`${BASE}/user-service/api/auth/signup`, payload);
   }
@@ -44,10 +46,15 @@ export class ApiService {
     return this.http.get<AuditSummary>(`${BASE}/orders-service/api/audit/summary`);
   }
   getStockValue(): Observable<number> {
-    return this.http.get<number>(`${BASE}/inventory-service/api/stock/value`);
+    // /api/inventory/value (not the older /api/stock/value) — matches what dealers
+    // actually add through the Inventory page; /api/stock is a separate, disconnected
+    // FIFO-batch valuation that inventory_items writes never populate.
+    return this.http.get<number>(`${BASE}/inventory-service/api/inventory/value`);
   }
-  getStockByPartNumber(partNumber: string): Observable<StockItem> {
-    return this.http.get<StockItem>(`${BASE}/inventory-service/api/stock/${encodeURIComponent(partNumber)}`);
+  getStockByPartNumber(partNumber: string, companyId?: number): Observable<InventoryItem> {
+    let params = new HttpParams();
+    if (companyId != null) params = params.set('companyId', companyId);
+    return this.http.get<InventoryItem>(`${BASE}/inventory-service/api/inventory/by-sku/${encodeURIComponent(partNumber)}`, { params });
   }
 
   // ── Job Cards ────────────────────────────────────────────────────────────
@@ -75,6 +82,9 @@ export class ApiService {
       { params: new HttpParams().set('paymentType', paymentType).set('paymentStatus', paymentStatus) }
     );
   }
+  updateJobCardBilling(id: number, body: { discount: number; cgstRate: number; sgstRate: number; igstRate: number }): Observable<JobCardDetail> {
+    return this.http.patch<JobCardDetail>(`${BASE}/orders-service/api/job-cards/${id}/billing`, body);
+  }
   addLabour(id: number, body: object): Observable<JobCardDetail> {
     return this.http.post<JobCardDetail>(`${BASE}/orders-service/api/job-cards/${id}/labour`, body);
   }
@@ -99,21 +109,14 @@ export class ApiService {
   deleteAncillary(id: number, ancId: number): Observable<JobCardDetail> {
     return this.http.delete<JobCardDetail>(`${BASE}/orders-service/api/job-cards/${id}/ancillary/${ancId}`);
   }
-  jobCardPdfUrl(id: number): string {
-    return `${BASE}/orders-service/api/job-cards/${id}/pdf`;
-  }
-  downloadJobCardPdf(id: number, filename: string): void {
-    this.http.get(`${BASE}/orders-service/api/job-cards/${id}/pdf`, { responseType: 'blob' }).subscribe(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-    });
+  generateInvoiceForJobCard(id: number): Observable<InvoiceDetail> {
+    return this.http.post<InvoiceDetail>(`${BASE}/orders-service/api/job-cards/${id}/invoice`, {});
   }
 
   // ── Inventory ────────────────────────────────────────────────────────────
-  getInventory(): Observable<InventoryItem[]> {
-    return this.http.get<InventoryItem[]>(`${BASE}/inventory-service/api/inventory`);
+  getInventory(category?: string): Observable<InventoryItem[]> {
+    const params = category ? `?category=${encodeURIComponent(category)}` : '';
+    return this.http.get<InventoryItem[]>(`${BASE}/inventory-service/api/inventory${params}`);
   }
   createInventoryItem(item: Partial<InventoryItem>): Observable<InventoryItem> {
     return this.http.post<InventoryItem>(`${BASE}/inventory-service/api/inventory`, item);
@@ -135,13 +138,25 @@ export class ApiService {
   getInvoice(id: number): Observable<InvoiceDetail> {
     return this.http.get<InvoiceDetail>(`${BASE}/orders-service/api/invoices/${id}`);
   }
-  downloadInvoicePdf(id: number, filename: string): void {
-    this.http.get(`${BASE}/orders-service/api/invoices/${id}/pdf`, { responseType: 'blob' }).subscribe(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-    });
+  // Returns an Observable (rather than firing the download itself) so callers can track
+  // completion and guard against a second click starting a second download before the
+  // first one finishes — see job-card-detail's downloadPdf().
+  downloadInvoicePdf(id: number, filename: string): Observable<void> {
+    return this.http.get(`${BASE}/orders-service/api/invoices/${id}/pdf`, { responseType: 'blob' }).pipe(
+      map(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+      })
+    );
+  }
+  // Raw blob for inline preview (an <iframe>/<embed>) — unlike downloadInvoicePdf this
+  // doesn't trigger a save-as, since the server's Content-Disposition: attachment header
+  // only matters when navigating straight to the URL, not when we hand the bytes to the
+  // browser ourselves via an object URL.
+  getInvoicePdfBlob(id: number): Observable<Blob> {
+    return this.http.get(`${BASE}/orders-service/api/invoices/${id}/pdf`, { responseType: 'blob' });
   }
   uploadInvoicePdf(pdfBytes: ArrayBuffer): Observable<InvoiceDetail> {
     return this.http.post<InvoiceDetail>(`${BASE}/orders-service/api/invoices/upload`, pdfBytes, {
@@ -210,5 +225,50 @@ export class ApiService {
   // ── Users ─────────────────────────────────────────────────────────────────
   getUsers(): Observable<AppUser[]> {
     return this.http.get<AppUser[]>(`${BASE}/user-service/api/users`);
+  }
+
+  // ── Attendance ────────────────────────────────────────────────────────────
+  checkIn(): Observable<AttendanceRecord> {
+    return this.http.post<AttendanceRecord>(`${BASE}/attendance-service/api/attendance/check-in`, {});
+  }
+  checkOut(): Observable<AttendanceRecord> {
+    return this.http.post<AttendanceRecord>(`${BASE}/attendance-service/api/attendance/check-out`, {});
+  }
+  myAttendance(from?: string, to?: string): Observable<AttendanceRecord[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to)   params = params.set('to', to);
+    return this.http.get<AttendanceRecord[]>(`${BASE}/attendance-service/api/attendance/me`, { params });
+  }
+  teamAttendance(from?: string, to?: string): Observable<AttendanceRecord[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to)   params = params.set('to', to);
+    return this.http.get<AttendanceRecord[]>(`${BASE}/attendance-service/api/attendance/team`, { params });
+  }
+  markAttendance(technicianUserId: number, date: string, status: AttendanceStatus): Observable<AttendanceRecord> {
+    return this.http.post<AttendanceRecord>(`${BASE}/attendance-service/api/attendance/mark`, { technicianUserId, date, status });
+  }
+
+  // ── Leave Requests ────────────────────────────────────────────────────────
+  applyLeave(body: { fromDate: string; toDate: string; leaveType: LeaveType; reason: string }): Observable<LeaveRequest> {
+    return this.http.post<LeaveRequest>(`${BASE}/attendance-service/api/leaves`, body);
+  }
+  myLeaves(): Observable<LeaveRequest[]> {
+    return this.http.get<LeaveRequest[]>(`${BASE}/attendance-service/api/leaves/me`);
+  }
+  teamLeaves(status?: LeaveStatus): Observable<LeaveRequest[]> {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    return this.http.get<LeaveRequest[]>(`${BASE}/attendance-service/api/leaves/team`, { params });
+  }
+  approveLeave(id: number, note?: string): Observable<LeaveRequest> {
+    return this.http.patch<LeaveRequest>(`${BASE}/attendance-service/api/leaves/${id}/approve`, { note });
+  }
+  rejectLeave(id: number, note?: string): Observable<LeaveRequest> {
+    return this.http.patch<LeaveRequest>(`${BASE}/attendance-service/api/leaves/${id}/reject`, { note });
+  }
+  cancelLeave(id: number): Observable<LeaveRequest> {
+    return this.http.patch<LeaveRequest>(`${BASE}/attendance-service/api/leaves/${id}/cancel`, {});
   }
 }

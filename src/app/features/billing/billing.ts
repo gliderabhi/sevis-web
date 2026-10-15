@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit, ElementRef, ViewChild } fr
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api';
 import { InvoiceDetail } from '../../core/models/models';
+import { apiErrorMessage } from '../../core/utils/api-error';
 
 @Component({
   selector: 'app-billing',
@@ -60,10 +61,23 @@ export class BillingComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        const msg = err?.error?.message ?? err?.message ?? `Server error (${err?.status ?? 'unknown'})`;
+        const msg = apiErrorMessage(err, err?.message ?? `Server error (${err?.status ?? 'unknown'})`);
         this.error.set(`Failed to load invoices. ${msg}`);
         this.loading.set(false);
       },
+    });
+  }
+
+  // downloadInvoicePdf returns a cold Observable (so callers can track completion and
+  // avoid double-firing it — see job-card-detail's downloadPdf) — it must be subscribed
+  // to actually run, so this can't be called bare from the template anymore.
+  downloadingPdf = signal(false);
+  downloadPdf(inv: InvoiceDetail): void {
+    if (this.downloadingPdf()) return;
+    this.downloadingPdf.set(true);
+    this.api.downloadInvoicePdf(inv.id, inv.invoiceNumber + '.pdf').subscribe({
+      next: () => this.downloadingPdf.set(false),
+      error: () => this.downloadingPdf.set(false),
     });
   }
 
@@ -137,7 +151,7 @@ export class BillingComponent implements OnInit {
           });
         },
         error: (err) => {
-          this.uploadError.set(err?.error?.message ?? 'Failed to process PDF.');
+          this.uploadError.set(apiErrorMessage(err, 'Failed to process PDF.'));
           this.uploading.set(false);
         },
       });

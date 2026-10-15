@@ -5,8 +5,8 @@
     <div>
       <h1 class="pc-title">Parts Catalogue</h1>
       <p class="pc-subtitle">
-        @if (totalElements() > 0) {
-          {{ totalElements().toLocaleString() }} parts in catalogue
+        @if (headerCount() > 0) {
+          {{ headerCount().toLocaleString() }} parts {{ selectedGroup() ? 'in ' + selectedGroup() : 'in catalogue' }}
         } @else {
           Master parts catalogue
         }

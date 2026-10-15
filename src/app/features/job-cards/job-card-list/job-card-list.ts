@@ -6,7 +6,7 @@ import { AuthService } from '../../../core/services/auth';
 import { JobCardSummary } from '../../../core/models/models';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 
-const STATUSES = ['ALL', 'RECEIVED', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'DELIVERED', 'CLOSED'];
+const STATUSES = ['ALL', 'OPEN', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'DELIVERED', 'CLOSED'];
 
 @Component({
   selector: 'app-job-card-list',

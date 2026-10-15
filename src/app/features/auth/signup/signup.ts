@@ -5,6 +5,7 @@ import { ApiService } from '../../../core/services/api';
 import { AuthService } from '../../../core/services/auth';
 import { PendingGoogleAuthService } from '../../../core/services/pending-google-auth';
 import { SeoService } from '../../../core/services/seo.service';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 @Component({
   selector: 'app-signup',
@@ -117,7 +118,7 @@ export class SignupComponent implements OnInit {
           this.router.navigate(['/dashboard']);
         },
         error: (err) => {
-          this.error.set(err?.error?.message ?? 'Could not complete signup. Please try again.');
+          this.error.set(apiErrorMessage(err, 'Could not complete signup. Please try again.'));
           this.loading.set(false);
         },
       });
@@ -147,7 +148,7 @@ export class SignupComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'Registration failed. Please try again.');
+        this.error.set(apiErrorMessage(err, 'Registration failed. Please try again.'));
         this.loading.set(false);
       },
     });

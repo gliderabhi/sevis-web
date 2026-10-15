@@ -5,6 +5,7 @@ import { ApiService } from '../../../core/services/api';
 import { AuthService } from '../../../core/services/auth';
 import { SeoService } from '../../../core/services/seo.service';
 import { PendingGoogleAuthService } from '../../../core/services/pending-google-auth';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 declare const google: any;
 
@@ -74,7 +75,7 @@ export class LoginComponent implements AfterViewInit {
           this.router.navigate(['/signup']);
           return;
         }
-        this.error.set(err?.error?.message ?? 'Google sign-in failed. Please try again.');
+        this.error.set(apiErrorMessage(err, 'Google sign-in failed. Please try again.'));
         this.loading.set(false);
       },
     });
@@ -95,7 +96,7 @@ export class LoginComponent implements AfterViewInit {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'Invalid credentials. Please try again.');
+        this.error.set(apiErrorMessage(err, 'Invalid credentials. Please try again.'));
         this.loading.set(false);
       },
     });

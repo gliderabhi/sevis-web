@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth';
 import { ApiService } from '../../core/services/api';
 import { IdleTimeoutService } from '../../core/services/idle-timeout.service';
 import { SeoService } from '../../core/services/seo.service';
+import { apiErrorMessage } from '../../core/utils/api-error';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -95,7 +96,7 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.changePwdSaving.set(true);
     this.api.changePassword(f.current, f.next).subscribe({
       next: () => { this.changePwdDone.set(true); this.changePwdSaving.set(false); setTimeout(() => this.closeChangePwd(), 1500); },
-      error: (err) => { this.changePwdError.set(err?.error?.message ?? 'Failed to change password.'); this.changePwdSaving.set(false); },
+      error: (err) => { this.changePwdError.set(apiErrorMessage(err, 'Failed to change password.')); this.changePwdSaving.set(false); },
     });
   }
 

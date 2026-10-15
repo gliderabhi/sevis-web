@@ -44,17 +44,16 @@
   color: #2563eb;
 }
 
-/* Dropdown */
+/* Dropdown — position:fixed (top/left/width set inline from the input's live
+   bounding rect, see part-picker.ts) so it escapes any ancestor modal's
+   overflow:hidden/auto instead of being clipped by it. */
 .pp-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  position: fixed;
   background: #fff;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  z-index: 100;
+  z-index: 1000;
   overflow: hidden;
   max-height: 280px;
   overflow-y: auto;

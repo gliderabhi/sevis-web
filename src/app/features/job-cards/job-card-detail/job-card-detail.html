@@ -25,7 +25,8 @@
             </svg>
             Add Labour
           </button>
-          <button class="jcd-action-btn jcd-action-btn--green" (click)="openPartForm()">
+          <button class="jcd-action-btn jcd-action-btn--green" (click)="openPartForm()"
+                  [disabled]="!jc.labourItems.length" [title]="!jc.labourItems.length ? 'Add a labour item first' : ''">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
@@ -38,13 +39,42 @@
             Add Ancillary
           </button>
         }
-        <button (click)="downloadPdf()" class="jcd-action-btn jcd-action-btn--ghost">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="pointer-events:none;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-          PDF
+        <button (click)="previewPdf()" class="jcd-action-btn jcd-action-btn--ghost" [disabled]="loadingPdfPreview()">
+          @if (loadingPdfPreview()) {
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="jcd-spin" style="pointer-events:none;">
+              <circle cx="12" cy="12" r="10" stroke="rgba(100,116,139,0.3)" stroke-width="4"/>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Loading…
+          } @else {
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="pointer-events:none;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            Preview
+          }
+        </button>
+        <button (click)="downloadPdf()" class="jcd-action-btn jcd-action-btn--ghost" [disabled]="downloadingPdf()">
+          @if (downloadingPdf()) {
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="jcd-spin" style="pointer-events:none;">
+              <circle cx="12" cy="12" r="10" stroke="rgba(100,116,139,0.3)" stroke-width="4"/>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Generating…
+          } @else {
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="pointer-events:none;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Download
+          }
         </button>
       </div>
+      @if (pdfDownloadError()) {
+        <div class="jcd-update-error" style="margin-top:8px;">{{ pdfDownloadError() }}</div>
+      }
+      @if (pdfPreviewError()) {
+        <div class="jcd-update-error" style="margin-top:8px;">{{ pdfPreviewError() }}</div>
+      }
     }
   </div>
 
@@ -68,7 +98,7 @@
           {{ labelOf(jc.serviceType) }}
           @if (jc.dateIn) { &nbsp;&bull;&nbsp; Date In: {{ fmtDate(jc.dateIn) }} }
           @if (jc.kmIn) { &nbsp;&bull;&nbsp; {{ jc.kmIn.toLocaleString('en-IN') }} km }
-          @if (jc.advisorName) { &nbsp;&bull;&nbsp; {{ jc.advisorName }} }
+          @if (jc.advisorName) { &nbsp;&bull;&nbsp; Advisor: {{ jc.advisorName }} }
         </p>
       </div>
     </div>
@@ -189,6 +219,12 @@
               <span class="jcd-info-val">{{ jc.vehicle.color }}</span>
             </div>
           }
+          @if (jc.vehicle.chassisNo) {
+            <div class="jcd-info-row">
+              <span class="jcd-info-key">Chassis No.</span>
+              <span class="jcd-info-val jcd-mono">{{ jc.vehicle.chassisNo }}</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -264,6 +300,11 @@
                 <td class="text-right font-bold">{{ fmt(l.amount) }}</td>
                 <td class="text-right">
                   @if (!isClosed() && !auth.isTechnician()) {
+                    <button class="jcd-del-btn" (click)="openPartForm(l.id)" title="Add part to this labour item" style="margin-right:4px;">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                      </svg>
+                    </button>
                     <button class="jcd-del-btn" (click)="deleteLabour(l.id)" title="Remove">
                       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="pointer-events:none;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -289,8 +330,10 @@
           </svg>
         </div>
         <p class="jcd-table-title">Parts</p>
-        <span class="jcd-count-badge jcd-count-badge--green">{{ jc.parts.length }}</span>
-        <button class="jcd-add-btn jcd-add-btn--green" (click)="openPartForm()" [disabled]="isClosed()" [class.jcd-add-btn--disabled]="isClosed()"  >
+        <span class="jcd-count-badge jcd-count-badge--green">{{ allParts().length }}</span>
+        <button class="jcd-add-btn jcd-add-btn--green" (click)="openPartForm()"
+                [disabled]="isClosed() || !jc.labourItems.length" [class.jcd-add-btn--disabled]="isClosed() || !jc.labourItems.length"
+                [title]="!jc.labourItems.length ? 'Add a labour item first' : ''">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
           </svg>
@@ -303,6 +346,7 @@
             <tr>
               <th>Part #</th>
               <th>Description</th>
+              <th>Labour Item</th>
               <th>Type</th>
               <th class="text-right">Qty</th>
               <th class="text-right">Unit Price</th>
@@ -311,10 +355,11 @@
             </tr>
           </thead>
           <tbody>
-            @for (p of jc.parts; track p.id) {
+            @for (p of allParts(); track p.id) {
               <tr>
                 <td><span class="jcd-part-number">{{ p.partNumber }}</span></td>
                 <td class="font-medium">{{ p.description }}</td>
+                <td class="text-muted">{{ p.labourDescription }}</td>
                 <td><span class="jcd-type-badge">{{ p.partType }}</span></td>
                 <td class="text-right">{{ p.quantity }}</td>
                 <td class="text-right text-muted">{{ fmt(p.unitPrice) }}</td>
@@ -330,7 +375,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" class="jcd-empty">No parts added yet</td></tr>
+              <tr><td colspan="8" class="jcd-empty">No parts added yet</td></tr>
             }
           </tbody>
         </table>
@@ -392,7 +437,48 @@
       <!-- Billing Summary -->
       @if (jc.billing; as b) {
         <div class="jcd-card">
-          <p class="jcd-section-label">Billing Summary</p>
+          <div class="jcd-section-header">
+            <p class="jcd-section-label">Billing Summary</p>
+            @if (!auth.isTechnician() && !isPaid()) {
+              <button type="button" class="jcd-link-btn" (click)="openBillingForm()">Edit Tax / Discount</button>
+            }
+          </div>
+
+          @if (showBillingForm()) {
+            @if (billingError()) {
+              <div class="jcd-update-error">{{ billingError() }}</div>
+            }
+            <div class="jcd-payment-fields">
+              <div class="jcd-field-group">
+                <label class="jcd-field-label">Discount (₹)</label>
+                <input type="number" min="0" [(ngModel)]="billingForm.discount" class="jcd-select" />
+              </div>
+              <div class="jcd-field-group">
+                <label class="jcd-field-label">CGST %</label>
+                <input type="number" min="0" max="100" [(ngModel)]="billingForm.cgstRate" class="jcd-select" />
+              </div>
+              <div class="jcd-field-group">
+                <label class="jcd-field-label">SGST %</label>
+                <input type="number" min="0" max="100" [(ngModel)]="billingForm.sgstRate" class="jcd-select" />
+              </div>
+              <div class="jcd-field-group">
+                <label class="jcd-field-label">IGST % (interstate)</label>
+                <input type="number" min="0" max="100" [(ngModel)]="billingForm.igstRate" class="jcd-select" />
+              </div>
+            </div>
+            <div class="jcd-form-actions">
+              <button type="button" class="jcd-modal-cancel" (click)="closeBillingForm()">Cancel</button>
+              <button
+                type="button"
+                class="jcd-modal-save jcd-modal-save--blue"
+                [disabled]="savingBilling()"
+                (click)="saveBilling()"
+              >
+                {{ savingBilling() ? 'Saving…' : 'Save' }}
+              </button>
+            </div>
+          }
+
           <div class="jcd-billing-rows">
             <div class="jcd-billing-row">
               <span>Labour</span><span>{{ fmt(b.labourTotal) }}</span>
@@ -408,12 +494,21 @@
                 <span>Discount</span><span>− {{ fmt(b.discount) }}</span>
               </div>
             }
-            <div class="jcd-billing-row">
-              <span>CGST ({{ b.cgstRate }}%)</span><span>{{ fmt(b.cgstAmount) }}</span>
-            </div>
-            <div class="jcd-billing-row">
-              <span>SGST ({{ b.sgstRate }}%)</span><span>{{ fmt(b.sgstAmount) }}</span>
-            </div>
+            @if (b.cgstRate) {
+              <div class="jcd-billing-row">
+                <span>CGST ({{ b.cgstRate }}%)</span><span>{{ fmt(b.cgstAmount) }}</span>
+              </div>
+            }
+            @if (b.sgstRate) {
+              <div class="jcd-billing-row">
+                <span>SGST ({{ b.sgstRate }}%)</span><span>{{ fmt(b.sgstAmount) }}</span>
+              </div>
+            }
+            @if (b.igstRate) {
+              <div class="jcd-billing-row">
+                <span>IGST ({{ b.igstRate }}%)</span><span>{{ fmt(b.igstAmount) }}</span>
+              </div>
+            }
             <div class="jcd-billing-total">
               <span>Grand Total</span><span>{{ fmt(b.grandTotal) }}</span>
             </div>
@@ -436,8 +531,8 @@
         </div>
       }
 
-      <!-- Payment (only when CLOSED) -->
-      @if (isClosed()) {
+      <!-- Payment (only appears once work is done, before the job card can move to DELIVERED/CLOSED) -->
+      @if (!auth.isTechnician() && (isPaid() || workDone())) {
         <div class="jcd-card">
           <p class="jcd-section-label">Payment</p>
 
@@ -507,41 +602,43 @@
       }
 
       <!-- Update Status -->
-      <div class="jcd-card">
-        <p class="jcd-section-label">Update Status</p>
-        @if (isClosed()) {
-          <div class="jcd-closed-notice">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-            This job card is closed. No further changes are allowed.
-          </div>
-        } @else {
-          @if (updateError()) {
-            <div class="jcd-update-error">{{ updateError() }}</div>
+      @if (!auth.isTechnician()) {
+        <div class="jcd-card">
+          <p class="jcd-section-label">Update Status</p>
+          @if (isClosed()) {
+            <div class="jcd-closed-notice">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              This job card is closed. No further changes are allowed.
+            </div>
+          } @else {
+            @if (updateError()) {
+              <div class="jcd-update-error">{{ updateError() }}</div>
+            }
+            <div class="jcd-status-form">
+              <select [(ngModel)]="newStatus" class="jcd-select">
+                @for (s of statuses(); track s) {
+                  <option [value]="s">{{ labelOf(s) }}</option>
+                }
+              </select>
+              <button class="jcd-update-btn" (click)="updateStatus()"
+                      [disabled]="updating() || newStatus === jc.status"
+                      [class.jcd-update-btn--disabled]="updating() || newStatus === jc.status">
+                @if (updating()) {
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="jcd-spin">
+                    <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="4"/>
+                    <path fill="#fff" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Updating…
+                } @else {
+                  Update Status
+                }
+              </button>
+            </div>
           }
-          <div class="jcd-status-form">
-            <select [(ngModel)]="newStatus" class="jcd-select">
-              @for (s of statuses; track s) {
-                <option [value]="s">{{ labelOf(s) }}</option>
-              }
-            </select>
-            <button class="jcd-update-btn" (click)="updateStatus()"
-                    [disabled]="updating() || newStatus === jc.status"
-                    [class.jcd-update-btn--disabled]="updating() || newStatus === jc.status">
-              @if (updating()) {
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="jcd-spin">
-                  <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="4"/>
-                  <path fill="#fff" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                Updating…
-              } @else {
-                Update Status
-              }
-            </button>
-          </div>
-        }
-      </div>
+        </div>
+      }
 
     </div>
 
@@ -574,7 +671,7 @@
         </div>
         <div class="jcd-field">
           <label class="jcd-label">Technician</label>
-          <select [(ngModel)]="labourForm.technicianId" class="jcd-select">
+          <select [ngModel]="labourForm.technicianId" (ngModelChange)="onTechnicianSelected($event)" class="jcd-select">
             <option [ngValue]="null">— Unassigned —</option>
             @for (t of technicians(); track t.id) {
               <option [ngValue]="t.id">{{ t.name }}{{ t.specialisation ? ' · ' + t.specialisation : '' }}</option>
@@ -591,11 +688,61 @@
             <input type="number" [(ngModel)]="labourForm.rate" min="0" class="jcd-input"/>
           </div>
         </div>
+
+        <div class="jcd-field" style="margin-top:8px;border-top:1px solid #e2e8f0;padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <label class="jcd-label" style="margin:0;">Parts for this labour item</label>
+            <button type="button" class="jcd-add-btn jcd-add-btn--green" (click)="addLabourPartRow()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="pointer-events:none;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Part
+            </button>
+          </div>
+
+          @if (labourPartError()) {
+            <div class="jcd-part-error" style="margin-top:10px;">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              {{ labourPartError() }}
+            </div>
+          }
+
+          @for (row of newLabourParts; track $index) {
+            <div style="margin-top:12px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:12px;font-weight:600;color:#64748b;">Part {{ $index + 1 }}</span>
+                <button type="button" class="jcd-del-btn" (click)="removeLabourPartRow($index)" title="Remove part">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="pointer-events:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="jcd-field">
+                <label class="jcd-label">Search Catalogue <span class="jcd-required">*</span></label>
+                <app-part-picker (partSelected)="onLabourPartSelected($index, $event)" (cleared)="onLabourPartCleared($index)"/>
+              </div>
+              @if (row.partNumber) {
+                <div class="jcd-field-row">
+                  <div class="jcd-field">
+                    <label class="jcd-label">Quantity</label>
+                    <input type="number" [(ngModel)]="row.quantity" [name]="'labourPartQuantity' + $index" min="1" class="jcd-input"/>
+                  </div>
+                  <div class="jcd-field">
+                    <label class="jcd-label">Unit Price (₹)</label>
+                    <input type="number" [(ngModel)]="row.unitPrice" [name]="'labourPartUnitPrice' + $index" min="0" class="jcd-input"/>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
       <div class="jcd-modal-footer">
         <button class="jcd-modal-cancel" (click)="closeLabourForm()">Cancel</button>
-        <button class="jcd-modal-save jcd-modal-save--blue" (click)="saveLabour()" [disabled]="savingLabour()">
-          @if (savingLabour()) { Adding… } @else { Add Labour }
+        <button class="jcd-modal-save jcd-modal-save--blue" (click)="saveLabour()" [disabled]="savingLabour() || checkingStock()">
+          @if (checkingStock()) { Checking stock… } @else if (savingLabour()) { Adding… } @else { Add Labour }
         </button>
       </div>
     </div>
@@ -622,39 +769,42 @@
           </div>
         }
         <div class="jcd-field">
-          <label class="jcd-label">Search Catalogue</label>
-          <app-part-picker (partSelected)="onCataloguePartSelected($event)" (cleared)="onCataloguePartCleared()"/>
-        </div>
-        <div class="jcd-field">
-          <label class="jcd-label">Part Number <span class="jcd-required">*</span></label>
-          <input type="text" [(ngModel)]="partForm.partNumber" placeholder="e.g. FIL-OIL-001" class="jcd-input jcd-input--mono"/>
-        </div>
-        <div class="jcd-field">
-          <label class="jcd-label">Description <span class="jcd-required">*</span></label>
-          <input type="text" [(ngModel)]="partForm.description" placeholder="e.g. Oil Filter" class="jcd-input"/>
-        </div>
-        <div class="jcd-field">
-          <label class="jcd-label">Part Type</label>
-          <select [(ngModel)]="partForm.partType" class="jcd-select">
-            <option value="SPARE_PART">Spare Part</option>
-            <option value="CONSUMABLE">Consumable</option>
-            <option value="ACCESSORY">Accessory</option>
+          <label class="jcd-label">Labour Item (Optional)</label>
+          <select [(ngModel)]="partForm.labourId" class="jcd-select">
+            <option [ngValue]="null">— Select —</option>
+            @for (l of card()?.labourItems; track l.id) {
+              <option [ngValue]="l.id">{{ l.description }}</option>
+            }
           </select>
         </div>
-        <div class="jcd-field-row">
-          <div class="jcd-field">
-            <label class="jcd-label">Quantity</label>
-            <input type="number" [(ngModel)]="partForm.quantity" min="1" class="jcd-input"/>
-          </div>
-          <div class="jcd-field">
-            <label class="jcd-label">Unit Price (₹)</label>
-            <input type="number" [(ngModel)]="partForm.unitPrice" min="0" class="jcd-input"/>
-          </div>
+        <div class="jcd-field">
+          <label class="jcd-label">Search Catalogue <span class="jcd-required">*</span></label>
+          <app-part-picker (partSelected)="onCataloguePartSelected($event)" (cleared)="onCataloguePartCleared()"/>
         </div>
+        @if (partForm.partNumber) {
+          <div class="jcd-field">
+            <label class="jcd-label">Part Type</label>
+            <select [(ngModel)]="partForm.partType" class="jcd-select">
+              <option value="SPARE_PART">Spare Part</option>
+              <option value="CONSUMABLE">Consumable</option>
+              <option value="ACCESSORY">Accessory</option>
+            </select>
+          </div>
+          <div class="jcd-field-row">
+            <div class="jcd-field">
+              <label class="jcd-label">Quantity</label>
+              <input type="number" [(ngModel)]="partForm.quantity" min="1" class="jcd-input"/>
+            </div>
+            <div class="jcd-field">
+              <label class="jcd-label">Unit Price (₹)</label>
+              <input type="number" [(ngModel)]="partForm.unitPrice" min="0" class="jcd-input"/>
+            </div>
+          </div>
+        }
       </div>
       <div class="jcd-modal-footer">
         <button class="jcd-modal-cancel" (click)="closePartForm()">Cancel</button>
-        <button class="jcd-modal-save jcd-modal-save--green" (click)="savePart()" [disabled]="savingPart() || checkingStock()">
+        <button class="jcd-modal-save jcd-modal-save--green" (click)="savePart()" [disabled]="savingPart() || checkingStock() || !partForm.partNumber">
           @if (checkingStock()) { Checking stock… } @else if (savingPart()) { Adding… } @else { Add Part }
         </button>
       </div>
@@ -673,6 +823,18 @@
         </button>
       </div>
       <div class="jcd-modal-body">
+        <div class="jcd-field">
+          <label class="jcd-label">Select from Inventory / Stock (Optional)</label>
+          <select class="jcd-input" [ngModel]="selectedAncillaryInventoryId()" (ngModelChange)="onSelectAncillaryFromInventory($event)">
+            <option [ngValue]="null">-- Custom Ancillary Item / Manual Entry --</option>
+            @for (item of inventoryAncillaryItems(); track item.id) {
+              <option [ngValue]="item.id">{{ item.name }} (₹{{ item.price }}) [SKU: {{ item.sku }}]</option>
+            }
+          </select>
+          @if (loadingAncillaryInventory()) {
+            <span style="font-size: 11px; color: var(--color-muted, #888); margin-top: 4px; display: block;">Loading inventory items...</span>
+          }
+        </div>
         <div class="jcd-field">
           <label class="jcd-label">Description <span class="jcd-required">*</span></label>
           <input type="text" [(ngModel)]="ancillaryForm.description" placeholder="e.g. Environmental Fee" class="jcd-input"/>

@@ -2,11 +2,29 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api';
 import { Technician, TechnicianSalary } from '../../core/models/models';
+import { apiErrorMessage } from '../../core/utils/api-error';
 
-const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', panNumber: '', aadhaarNumber: '', userId: null });
-const BLANK_LOGIN = () => ({ email: '', password: '' });
+const BLANK = (): Partial<Technician> => ({ name: '', phone: '', specialisation: 'MECHANICAL', employeeCode: '', panNumber: '', aadhaarNumber: '', baseRate: 100, userId: null, supervisorTechnicianId: null });
+const BLANK_LOGIN = () => ({ email: '', password: '', role: 'TECHNICIAN' });
+
+// Workshop staff hierarchy — every one of these is created the same way a
+// technician always was (Technician record + DealerTechnicianAssignment to
+// this dealer), the login role just reflects where they sit in the ladder.
+const STAFF_ROLES = [
+  { value: 'HELPER', label: 'Helper' },
+  { value: 'TECHNICIAN', label: 'Technician' },
+  { value: 'SENIOR_TECHNICIAN', label: 'Senior Technician' },
+  { value: 'SUPERVISOR', label: 'Supervisor' },
+  { value: 'SERVICE_ADVISOR', label: 'Service Advisor' },
+  { value: 'MANAGER', label: 'Manager' },
+  { value: 'GM', label: 'GM' },
+  { value: 'OWNER', label: 'Owner' },
+];
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Standard Indian PAN format: 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F).
+const PAN_PATTERN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 @Component({
   selector: 'app-technicians',
@@ -32,6 +50,7 @@ export class TechniciansComponent implements OnInit {
   loginForm = signal(BLANK_LOGIN());
 
   specialisations = ['MECHANICAL', 'ELECTRICAL', 'BODYWORK', 'AC', 'GENERAL'];
+  staffRoles = STAFF_ROLES;
   months = MONTHS;
 
   // Salary modal
@@ -73,10 +92,18 @@ export class TechniciansComponent implements OnInit {
 
   openEdit(t: Technician): void {
     this.editingId.set(t.id);
-    this.form.set({ name: t.name, phone: t.phone, specialisation: t.specialisation, employeeCode: t.employeeCode, panNumber: t.panNumber, aadhaarNumber: t.aadhaarNumber, userId: t.userId ?? null });
+    this.form.set({ name: t.name, phone: t.phone, specialisation: t.specialisation, employeeCode: t.employeeCode, panNumber: t.panNumber, aadhaarNumber: t.aadhaarNumber, baseRate: t.baseRate || 100, userId: t.userId ?? null, supervisorTechnicianId: t.supervisorTechnicianId ?? null });
     this.formError.set('');
     this.showForm.set(true);
   }
+
+  // Anyone but the person currently being edited — "reports to" is one level (direct
+  // supervisor only), so no rank filtering here; see TechnicianController.validateSupervisor
+  // for the one constraint actually enforced (same dealer, not yourself).
+  supervisorOptions = computed(() => {
+    const editing = this.editingId();
+    return this.technicians().filter(t => t.active && t.id !== editing);
+  });
 
   closeForm(): void { this.showForm.set(false); }
 
@@ -86,6 +113,15 @@ export class TechniciansComponent implements OnInit {
     const id = this.editingId();
 
     if (!f.name?.trim()) { this.formError.set('Name is required.'); return; }
+
+    // Checked before the login account is created below — an invalid PAN used to only
+    // surface once technician-record creation itself failed, which by then had already
+    // created a real (orphaned) login with no technician profile attached to it.
+    const pan = f.panNumber?.trim().toUpperCase();
+    if (pan && !PAN_PATTERN.test(pan)) {
+      this.formError.set('PAN must be in the format ABCDE1234F (5 letters, 4 digits, 1 letter).');
+      return;
+    }
 
     if (!id) {
       if (!lf.email?.trim()) { this.formError.set('Login email is required.'); return; }
@@ -100,20 +136,20 @@ export class TechniciansComponent implements OnInit {
     if (id) {
       this.api.updateTechnician(id, f).subscribe({
         next: () => { this.saving.set(false); this.closeForm(); this.load(); },
-        error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to save.'); this.saving.set(false); },
+        error: (err) => { this.formError.set(apiErrorMessage(err, 'Failed to save.')); this.saving.set(false); },
       });
       return;
     }
 
     // New technician: create login first, then create technician with userId
-    this.api.registerTechnician({ name: f.name!.trim(), email: lf.email.trim(), password: lf.password, phone: f.phone }).subscribe({
+    this.api.registerTechnician({ name: f.name!.trim(), email: lf.email.trim(), password: lf.password, phone: f.phone, role: lf.role }).subscribe({
       next: (res) => {
         this.api.createTechnician({ ...f, userId: res.userId }).subscribe({
           next: () => { this.saving.set(false); this.closeForm(); this.load(); },
-          error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to create technician.'); this.saving.set(false); },
+          error: (err) => { this.formError.set(apiErrorMessage(err, 'Failed to create technician.')); this.saving.set(false); },
         });
       },
-      error: (err) => { this.formError.set(err?.error?.message ?? 'Failed to create login account.'); this.saving.set(false); },
+      error: (err) => { this.formError.set(apiErrorMessage(err, 'Failed to create login account.')); this.saving.set(false); },
     });
   }
 
@@ -152,7 +188,7 @@ export class TechniciansComponent implements OnInit {
         this.savingSalary.set(false);
         this.api.getSalariesByTechnician(t.id).subscribe({ next: (list) => this.salaries.set(list) });
       },
-      error: (err) => { this.salaryError.set(err?.error?.message ?? 'Failed to save salary.'); this.savingSalary.set(false); },
+      error: (err) => { this.salaryError.set(apiErrorMessage(err, 'Failed to save salary.')); this.savingSalary.set(false); },
     });
   }
 

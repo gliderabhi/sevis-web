@@ -1,0 +1,245 @@
+<div class="att-page">
+
+  <div class="att-header">
+    <div>
+      <h1 class="att-title">Attendance</h1>
+      <p class="att-subtitle">
+        @if (isTechnician) { Check in, check out, and manage your leave requests }
+        @else { Track your team's attendance and review leave requests }
+      </p>
+    </div>
+    @if (!isTechnician) {
+      <button class="att-add-btn" (click)="openMarkForm()">Mark Attendance</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="att-loading">Loading…</div>
+  } @else if (error()) {
+    <div class="att-error">{{ error() }}</div>
+  } @else if (isTechnician) {
+
+    <!-- Technician: today's check-in card -->
+    <div class="att-card att-today">
+      <div class="att-today-status">
+        @if (!today()) {
+          <span class="att-badge att-badge--absent">Not checked in today</span>
+        } @else if (!today()!.checkOutTime) {
+          <span class="att-badge att-badge--present">Checked in at {{ fmtTime(today()!.checkInTime) }}</span>
+        } @else {
+          <span class="att-badge att-badge--present">{{ fmtTime(today()!.checkInTime) }} – {{ fmtTime(today()!.checkOutTime) }}</span>
+        }
+      </div>
+      <div class="att-today-actions">
+        @if (!today() || !today()!.checkInTime) {
+          <button class="att-btn att-btn--primary" [disabled]="checkingInOut()" (click)="checkIn()">Check In</button>
+        } @else if (!today()!.checkOutTime) {
+          <button class="att-btn att-btn--primary" [disabled]="checkingInOut()" (click)="checkOut()">Check Out</button>
+        }
+        <button class="att-btn" (click)="openLeaveForm()">Apply Leave</button>
+      </div>
+      @if (checkError()) { <div class="att-form-error">{{ checkError() }}</div> }
+    </div>
+
+    <!-- My attendance history -->
+    <h2 class="att-section-title">My Attendance (last 30 days)</h2>
+    <div class="att-table-wrap">
+      <table class="att-table">
+        <thead><tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr></thead>
+        <tbody>
+          @for (r of myRecords(); track r.id) {
+            <tr>
+              <td>{{ fmtDate(r.date) }}</td>
+              <td><span class="att-badge att-badge--{{ r.status.toLowerCase() }}">{{ r.status.replace('_',' ') }}</span></td>
+              <td>{{ fmtTime(r.checkInTime) }}</td>
+              <td>{{ fmtTime(r.checkOutTime) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="att-empty">No attendance records yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- My leave requests -->
+    <h2 class="att-section-title">My Leave Requests</h2>
+    <div class="att-table-wrap">
+      <table class="att-table">
+        <thead><tr><th>From</th><th>To</th><th>Type</th><th>Reason</th><th>Status</th><th>Manager's Remark</th><th></th></tr></thead>
+        <tbody>
+          @for (l of myLeaves(); track l.id) {
+            <tr>
+              <td>{{ fmtDate(l.fromDate) }}</td>
+              <td>{{ fmtDate(l.toDate) }}</td>
+              <td>{{ l.leaveType }}</td>
+              <td class="att-reason">{{ l.reason }}</td>
+              <td><span class="att-badge att-badge--leave-{{ l.status.toLowerCase() }}">{{ l.status }}</span></td>
+              <td class="att-reason">{{ l.decisionNote || '—' }}</td>
+              <td>
+                @if (l.status === 'PENDING') {
+                  <button class="att-btn att-btn--small" (click)="cancelLeave(l)">Cancel</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="att-empty">No leave requests yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- My team (direct reports only, e.g. a Technician's Helpers) — empty for anyone
+         nobody currently reports to. -->
+    <h2 class="att-section-title">My Team's Attendance (last 30 days)</h2>
+    <div class="att-table-wrap">
+      <table class="att-table">
+        <thead><tr><th>Technician (User ID)</th><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr></thead>
+        <tbody>
+          @for (r of teamRecords(); track r.id) {
+            <tr>
+              <td>{{ r.technicianUserId }}</td>
+              <td>{{ fmtDate(r.date) }}</td>
+              <td><span class="att-badge att-badge--{{ r.status.toLowerCase() }}">{{ r.status.replace('_',' ') }}</span></td>
+              <td>{{ fmtTime(r.checkInTime) }}</td>
+              <td>{{ fmtTime(r.checkOutTime) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="att-empty">Nobody reports to you yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="att-section-title">My Team's Leave Requests</h2>
+    <div class="att-table-wrap">
+      <table class="att-table">
+        <thead><tr><th>Technician (User ID)</th><th>From</th><th>To</th><th>Type</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          @for (l of teamLeaves(); track l.id) {
+            <tr>
+              <td>{{ l.technicianUserId }}</td>
+              <td>{{ fmtDate(l.fromDate) }}</td>
+              <td>{{ fmtDate(l.toDate) }}</td>
+              <td>{{ l.leaveType }}</td>
+              <td class="att-reason">{{ l.reason }}</td>
+              <td><span class="att-badge att-badge--leave-{{ l.status.toLowerCase() }}">{{ l.status }}</span></td>
+              <td>
+                @if (l.status === 'PENDING') {
+                  <button class="att-btn att-btn--small att-btn--primary" (click)="approve(l)">Approve</button>
+                  <button class="att-btn att-btn--small" (click)="reject(l)">Reject</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="att-empty">Nobody reports to you yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  } @else {
+
+    <!-- Dealer/Admin: team attendance -->
+    <h2 class="att-section-title">Team Attendance (last 30 days)</h2>
+    <div class="att-table-wrap">
+      <table class="att-table">
+        <thead><tr><th>Technician (User ID)</th><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr></thead>
+        <tbody>
+          @for (r of teamRecords(); track r.id) {
+            <tr>
+              <td>{{ r.technicianUserId }}</td>
+              <td>{{ fmtDate(r.date) }}</td>
+              <td><span class="att-badge att-badge--{{ r.status.toLowerCase() }}">{{ r.status.replace('_',' ') }}</span></td>
+              <td>{{ fmtTime(r.checkInTime) }}</td>
+              <td>{{ fmtTime(r.checkOutTime) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="att-empty">No attendance records yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dealer/Admin: leave requests -->
+    <h2 class="att-section-title">Leave Requests</h2>
+    <div class="att-table-wrap">
+      <table class="att-table">
+        <thead><tr><th>Technician (User ID)</th><th>From</th><th>To</th><th>Type</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          @for (l of teamLeaves(); track l.id) {
+            <tr>
+              <td>{{ l.technicianUserId }}</td>
+              <td>{{ fmtDate(l.fromDate) }}</td>
+              <td>{{ fmtDate(l.toDate) }}</td>
+              <td>{{ l.leaveType }}</td>
+              <td class="att-reason">{{ l.reason }}</td>
+              <td><span class="att-badge att-badge--leave-{{ l.status.toLowerCase() }}">{{ l.status }}</span></td>
+              <td>
+                @if (l.status === 'PENDING') {
+                  <button class="att-btn att-btn--small att-btn--primary" (click)="approve(l)">Approve</button>
+                  <button class="att-btn att-btn--small" (click)="reject(l)">Reject</button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="att-empty">No leave requests yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Apply leave modal -->
+  @if (showLeaveForm()) {
+    <div class="att-modal-overlay" (click)="closeLeaveForm()">
+      <div class="att-modal" (click)="$event.stopPropagation()">
+        <h3>Apply for Leave</h3>
+        @if (leaveError()) { <div class="att-form-error">{{ leaveError() }}</div> }
+        <label>From
+          <input type="date" [ngModel]="leaveForm().fromDate" (ngModelChange)="leaveForm.set({...leaveForm(), fromDate: $event})" />
+        </label>
+        <label>To
+          <input type="date" [ngModel]="leaveForm().toDate" (ngModelChange)="leaveForm.set({...leaveForm(), toDate: $event})" />
+        </label>
+        <label>Type
+          <select [ngModel]="leaveForm().leaveType" (ngModelChange)="leaveForm.set({...leaveForm(), leaveType: $event})">
+            @for (t of leaveTypes; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </label>
+        <label>Reason
+          <textarea rows="3" [ngModel]="leaveForm().reason" (ngModelChange)="leaveForm.set({...leaveForm(), reason: $event})"></textarea>
+        </label>
+        <div class="att-modal-actions">
+          <button class="att-btn" (click)="closeLeaveForm()">Cancel</button>
+          <button class="att-btn att-btn--primary" [disabled]="savingLeave()" (click)="submitLeave()">Submit</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Manual mark modal -->
+  @if (showMarkForm()) {
+    <div class="att-modal-overlay" (click)="closeMarkForm()">
+      <div class="att-modal" (click)="$event.stopPropagation()">
+        <h3>Mark Attendance</h3>
+        @if (markError()) { <div class="att-form-error">{{ markError() }}</div> }
+        <label>Technician's User Account ID
+          <input type="number" [ngModel]="markForm().technicianUserId" (ngModelChange)="markForm.set({...markForm(), technicianUserId: $event})" />
+        </label>
+        <label>Date
+          <input type="date" [ngModel]="markForm().date" (ngModelChange)="markForm.set({...markForm(), date: $event})" />
+        </label>
+        <label>Status
+          <select [ngModel]="markForm().status" (ngModelChange)="markForm.set({...markForm(), status: $event})">
+            @for (s of attendanceStatuses; track s) { <option [value]="s">{{ s.replace('_',' ') }}</option> }
+          </select>
+        </label>
+        <div class="att-modal-actions">
+          <button class="att-btn" (click)="closeMarkForm()">Cancel</button>
+          <button class="att-btn att-btn--primary" [disabled]="savingMark()" (click)="submitMark()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

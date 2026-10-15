@@ -4,6 +4,15 @@ import { inject } from '@angular/core';
 
 export interface StoredUser { name: string; email: string; role: string; }
 
+// Workshop staff hierarchy: owner > GM > manager > service advisor > supervisor
+// > senior technician > technician > helper. STAFF_TIER_ROLES mirrors
+// RoleTiers.STAFF_TIER on the backend (orders-service/sevis-common) — keep in
+// sync if that list changes. Everything outside STAFF_TIER_ROLES (DEALER and
+// the other management-hierarchy roles, plus ADMIN) behaves like the
+// original "management" (non-technician) role for UI purposes.
+const STAFF_TIER_ROLES = ['TECHNICIAN', 'SENIOR_TECHNICIAN', 'HELPER'];
+export const MANAGEMENT_ROLES = ['DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'];
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
@@ -17,7 +26,8 @@ export class AuthService {
   readonly user     = this._user.asReadonly();
   readonly isLoggedIn    = computed(() => !!this._token());
   readonly isAdmin       = computed(() => ['ADMIN', 'admin'].includes(this._user()?.role ?? ''));
-  readonly isTechnician  = computed(() => this._user()?.role === 'TECHNICIAN');
+  readonly isTechnician  = computed(() => STAFF_TIER_ROLES.includes(this._user()?.role ?? ''));
+  readonly isManagement  = computed(() => MANAGEMENT_ROLES.includes(this._user()?.role ?? ''));
 
   setSession(token: string, user: StoredUser): void {
     localStorage.setItem('sevis_token', token);

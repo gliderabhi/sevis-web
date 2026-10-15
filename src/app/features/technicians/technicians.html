@@ -55,6 +55,7 @@
           @if (t.phone) { <div class="tec-phone">{{ t.phone }}</div> }
           @if (t.panNumber) { <div class="tec-id">PAN: {{ t.panNumber }}</div> }
           @if (t.aadhaarNumber) { <div class="tec-id">Aadhaar: ••••&nbsp;{{ t.aadhaarNumber.slice(-4) }}</div> }
+          @if (t.supervisorName) { <div class="tec-id">Reports to: {{ t.supervisorName }}</div> }
           <div class="tec-dates">
             @if (t.joinedDate) { <span>Joined {{ fmtDate(t.joinedDate) }}</span> }
             @if (!t.active && t.leftDate) { <span class="tec-left">· Left {{ fmtDate(t.leftDate) }}</span> }
@@ -104,7 +105,7 @@
           </div>
           <div class="tec-field">
             <label>PAN Number</label>
-            <input type="text" [ngModel]="form().panNumber" (ngModelChange)="form.update(f => ({...f, panNumber: $event}))" placeholder="ABCDE1234F" style="text-transform:uppercase;" />
+            <input type="text" [ngModel]="form().panNumber" (ngModelChange)="form.update(f => ({...f, panNumber: $event}))" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase;" />
           </div>
         </div>
         <div class="tec-field-row">
@@ -119,6 +120,19 @@
             </select>
           </div>
         </div>
+        <div class="tec-field-row">
+          <div class="tec-field">
+            <label>Base Rate (₹)</label>
+            <input type="number" min="0" [ngModel]="form().baseRate" (ngModelChange)="form.update(f => ({...f, baseRate: $event}))" placeholder="0" />
+          </div>
+          <div class="tec-field">
+            <label>Reports To</label>
+            <select [ngModel]="form().supervisorTechnicianId" (ngModelChange)="form.update(f => ({...f, supervisorTechnicianId: $event ? +$event : null}))">
+              <option [value]="null">— Dealer directly —</option>
+              @for (s of supervisorOptions(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+            </select>
+          </div>
+        </div>
         @if (!editingId()) {
           <div style="margin-top:8px;padding-top:16px;border-top:1px solid #e2e8f0;">
             <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">Login Credentials</p>
@@ -130,6 +144,14 @@
               <div class="tec-field">
                 <label>Password *</label>
                 <input type="password" [ngModel]="loginForm().password" (ngModelChange)="loginForm.update(f => ({...f, password: $event}))" placeholder="Min 8 chars, 1 uppercase, 1 digit" />
+              </div>
+            </div>
+            <div class="tec-field-row">
+              <div class="tec-field">
+                <label>Designation</label>
+                <select [ngModel]="loginForm().role" (ngModelChange)="loginForm.update(f => ({...f, role: $event}))">
+                  @for (r of staffRoles; track r) { <option [value]="r.value">{{ r.label }}</option> }
+                </select>
               </div>
             </div>
           </div>

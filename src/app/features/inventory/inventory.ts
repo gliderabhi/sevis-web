@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api';
 import { InventoryItem, Part } from '../../core/models/models';
 import { PartPickerComponent } from '../../shared/components/part-picker/part-picker';
+import { apiErrorMessage } from '../../core/utils/api-error';
 
 @Component({
   selector: 'app-inventory',
@@ -23,9 +24,10 @@ export class InventoryComponent implements OnInit {
   formError = signal('');
 
   selectedItem = signal<InventoryItem | null>(null);
+  selectedCategoryFilter = signal<'ALL' | 'PART' | 'ANCILLARY'>('ALL');
 
   // Form model
-  form: Partial<InventoryItem> = { name: '', sku: '', quantity: 0, price: 0 };
+  form: Partial<InventoryItem> = { name: '', sku: '', quantity: 1, price: 0, category: 'PART' };
 
   onPartSelected(part: Part): void {
     this.form.name = part.description;
@@ -38,12 +40,35 @@ export class InventoryComponent implements OnInit {
     this.form.sku = '';
   }
 
+  setCategory(category: 'PART' | 'ANCILLARY'): void {
+    this.form.category = category;
+    if (category === 'ANCILLARY' && (!this.form.sku || this.form.sku.startsWith('PART-'))) {
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      this.form.sku = `ANC-${randomSuffix}`;
+    }
+  }
+
+  filteredItems = computed(() => {
+    const f = this.selectedCategoryFilter();
+    const list = this.items();
+    if (f === 'ALL') return list;
+    return list.filter((i) => (i.category || 'PART').toUpperCase() === f);
+  });
+
   stockValue = computed(() =>
-    this.items().reduce((sum, i) => sum + i.quantity * i.price, 0)
+    this.filteredItems().reduce((sum, i) => sum + i.quantity * i.price, 0)
   );
 
   lowStockCount = computed(() =>
-    this.items().filter((i) => i.quantity < 5).length
+    this.filteredItems().filter((i) => i.quantity < 5).length
+  );
+
+  partCount = computed(() =>
+    this.items().filter((i) => (i.category || 'PART').toUpperCase() === 'PART').length
+  );
+
+  ancillaryCount = computed(() =>
+    this.items().filter((i) => (i.category || '').toUpperCase() === 'ANCILLARY').length
   );
 
   ngOnInit(): void {
@@ -64,9 +89,10 @@ export class InventoryComponent implements OnInit {
     });
   }
 
-  openAdd(): void {
+  openAdd(defaultCategory: 'PART' | 'ANCILLARY' = 'PART'): void {
     this.selectedItem.set(null);
-    this.form = { name: '', sku: '', quantity: 0, price: 0 };
+    const sku = defaultCategory === 'ANCILLARY' ? `ANC-${Math.floor(1000 + Math.random() * 9000)}` : '';
+    this.form = { name: '', sku, quantity: 1, price: 0, category: defaultCategory };
     this.formError.set('');
     this.partPicker?.clear();
     this.showForm.set(true);
@@ -74,7 +100,7 @@ export class InventoryComponent implements OnInit {
 
   openEdit(item: InventoryItem): void {
     this.selectedItem.set(item);
-    this.form = { ...item };
+    this.form = { ...item, category: item.category || 'PART' };
     this.formError.set('');
     this.showForm.set(true);
   }
@@ -101,7 +127,7 @@ export class InventoryComponent implements OnInit {
           this.saving.set(false);
         },
         error: (err) => {
-          this.formError.set(err?.error?.message ?? 'Failed to update item.');
+          this.formError.set(apiErrorMessage(err, 'Failed to update item.'));
           this.saving.set(false);
         },
       });
@@ -113,7 +139,7 @@ export class InventoryComponent implements OnInit {
           this.saving.set(false);
         },
         error: (err) => {
-          this.formError.set(err?.error?.message ?? 'Failed to create item.');
+          this.formError.set(apiErrorMessage(err, 'Failed to create item.'));
           this.saving.set(false);
         },
       });

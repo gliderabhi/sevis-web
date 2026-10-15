@@ -31,7 +31,8 @@
 
     <!-- Dropdown -->
     @if (open() && suggestions().length > 0) {
-      <div class="pp-dropdown">
+      <div class="pp-dropdown"
+           [style.top.px]="dropdownTop()" [style.left.px]="dropdownLeft()" [style.width.px]="dropdownWidth()">
         @for (part of suggestions(); track part.id) {
           <button class="pp-option" type="button" (click)="select(part)">
             <div class="pp-option-top">

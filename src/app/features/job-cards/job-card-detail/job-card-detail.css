@@ -493,6 +493,29 @@
 .jcd-update-btn:hover:not(:disabled) { background: #1d4ed8; }
 .jcd-update-btn--disabled { opacity: 0.5; cursor: not-allowed; }
 
+.jcd-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.jcd-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.jcd-link-btn:hover { text-decoration: underline; }
+.jcd-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 12px 0;
+}
+.jcd-field-group { display: flex; flex-direction: column; gap: 4px; }
+
 .jcd-spin { animation: jcd-spin 1s linear infinite; }
 
 /* Modals */
@@ -514,6 +537,9 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   width: 100%;
   max-width: 440px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -523,7 +549,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
+
 
 .jcd-modal-title {
   margin: 0;
@@ -552,6 +580,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
 }
 
 .jcd-field {
@@ -596,6 +625,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-shrink: 0;
   gap: 10px;
 }
 

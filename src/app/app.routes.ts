@@ -16,18 +16,19 @@ export const routes: Routes = [
       // Both roles
       { path: 'dashboard',  loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent) },
       { path: 'job-cards',  loadComponent: () => import('./features/job-cards/job-card-list/job-card-list').then(m => m.JobCardListComponent) },
+      { path: 'attendance', loadComponent: () => import('./features/attendance/attendance').then(m => m.AttendanceComponent) },
 
       // Admin + Dealer (not Technician)
-      { path: 'job-cards/new', canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/job-cards/job-card-create/job-card-create').then(m => m.JobCardCreateComponent) },
+      { path: 'job-cards/new', canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/job-cards/job-card-create/job-card-create').then(m => m.JobCardCreateComponent) },
 
       { path: 'job-cards/:id', loadComponent: () => import('./features/job-cards/job-card-detail/job-card-detail').then(m => m.JobCardDetailComponent) },
-      { path: 'parts',      canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/parts/parts-catalogue/parts-catalogue').then(m => m.PartsCatalogueComponent) },
-      { path: 'inventory',  canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/inventory/inventory').then(m => m.InventoryComponent) },
-      { path: 'billing',    canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/billing/billing').then(m => m.BillingComponent) },
-      { path: 'reports',    canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/reports/reports').then(m => m.ReportsComponent) },
+      { path: 'parts',      canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/parts/parts-catalogue/parts-catalogue').then(m => m.PartsCatalogueComponent) },
+      { path: 'inventory',  canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/inventory/inventory').then(m => m.InventoryComponent) },
+      { path: 'billing',    canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/billing/billing').then(m => m.BillingComponent) },
+      { path: 'reports',    canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/reports/reports').then(m => m.ReportsComponent) },
       { path: 'users',      canActivate: [rolesGuard(['ADMIN'])],           loadComponent: () => import('./features/users/users').then(m => m.UsersComponent) },
-      { path: 'technicians', canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/technicians/technicians').then(m => m.TechniciansComponent) },
-      { path: 'vehicles',   canActivate: [rolesGuard(['ADMIN', 'DEALER'])], loadComponent: () => import('./features/vehicles/vehicles').then(m => m.VehiclesComponent) },
+      { path: 'technicians', canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/technicians/technicians').then(m => m.TechniciansComponent) },
+      { path: 'vehicles',   canActivate: [rolesGuard(['ADMIN', 'DEALER', 'OWNER', 'GM', 'MANAGER', 'SERVICE_ADVISOR', 'SUPERVISOR'])], loadComponent: () => import('./features/vehicles/vehicles').then(m => m.VehiclesComponent) },
     ],
   },
   { path: '**', redirectTo: '' },
